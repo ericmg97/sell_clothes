@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logfile = open("./sells.log", "a")
 
     while True:
-        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\nEnter - Terminar\n-> ")
+        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\nEnter - Terminar\n-> ")
         if selected == "1":
             curr_art = 1
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
                                         json.dump(names,nm)
                                     break
                                 except:
-                                    print("Prociento incorrecto -> (0-100)")
+                                    print("Porciento incorrecto -> (0-100)")
 
                         while True:
                             try:
@@ -135,5 +135,14 @@ if __name__ == "__main__":
                     print("_"*80)
                     print("%-20s%-10s%-10s%-10s%-10s" % ("General",cant,total,total_dar,total_gan), *sold_out)
                     print()
+        
+        elif selected == '4':
+
+            print()
+            with open("./sells.log", 'r') as s:
+                [print(line[:-1]) for line in s.readlines()]
+
+            print()
+            
         else:
             break
