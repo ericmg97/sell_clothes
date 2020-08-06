@@ -18,6 +18,8 @@ if __name__ == "__main__":
 
     while True:
         selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\nEnter - Terminar\n-> ")
+        print()
+
         if selected == "1":
             curr_art = 1
 
@@ -26,15 +28,16 @@ if __name__ == "__main__":
                 curr_art = len(data) + 1
 
                 while True:
-                    name = input("Dueño del articulo:")
+                    name = input("Dueño del articulo: ")
                     if name == "":
+                        print()
                         break
                     
                     with open("./names.db") as nm:
                         names = json.load(nm)
                         if name not in names:
                             while True:
-                                gain = input("Porciento de ganancia (0-100) :")
+                                gain = input("Porciento de ganancia (0-100): ")
                                 try:
                                     if gain == "":
                                         gain = 0
@@ -45,18 +48,31 @@ if __name__ == "__main__":
                                     names[name] = (0, 0, 0, int(gain), [])
                                     with open("./names.db", "w") as nm:
                                         json.dump(names,nm)
+
+                                    print()
                                     break
                                 except:
                                     print("Porciento incorrecto -> (0-100)")
+                        else:
+                            print()
 
                         while True:
                             try:
-                                prices = input(f"Añadir precios de articulo {curr_art} (Venta, Costo):").split()
+                                info = input(f"Añadir informacion de articulo {curr_art}: ")
+
+                                if not len(info):
+                                    print()
+                                    break
+
+                                prices = input(f"Añadir precios de articulo {curr_art} (Venta Costo): ").split()
+                                
                                 try:
                                     if len(prices) == 2:
-                                        data[curr_art] = (int(prices[0]), int(prices[1]), False, name)
+                                        data[curr_art] = (int(prices[0]), int(prices[1]), False, name, info)
                                     else:
-                                        data[curr_art] = (int(prices[0]), int(prices[0]), False, name)
+                                        data[curr_art] = (int(prices[0]), int(prices[0]), False, name, info)
+
+                                    print(f"Articulo Añadido Exitosamente \n")
 
                                     with open("./database.db", "w") as db:
                                         json.dump(data,db)
@@ -65,6 +81,7 @@ if __name__ == "__main__":
                                 except ValueError:
                                     pass
                             except IndexError:
+                                print()
                                 break
 
         elif selected == "2":
@@ -76,6 +93,7 @@ if __name__ == "__main__":
                     clothes = clothes.split()
 
                     if not len(clothes):
+                        print()
                         break
 
                     tot_price = 0
@@ -85,25 +103,31 @@ if __name__ == "__main__":
                             print(f"{clothe} No existe")
                             clothes.remove(clothe)
                         elif data[clothe][2]:
-                            print(f"{clothe} Ya esta vendido")
+                            print(f"{data[clothe][4]} -> Ya esta vendido")
                             clothes.remove(clothe)
                         else:
-                            tot_price += float(data[clothe][0])
+                            info = data[clothe][4]
+                            price = float(data[clothe][0])
+
+                            print(f'{info} -> {price}')
+                            tot_price += price
                  
-                    print(f"Precio Total: {tot_price}")
+                    print(f"\nPrecio Total: {tot_price}\n")
 
                     sure = input("Confirmar: ")
                     if(sure == ""):
-                        print("OK")
+                        print("OK\n")
                         for clothe in clothes:
                             temp = data[clothe]
-                            data[clothe] = (temp[0], temp[1], True, temp[3])
+                            data[clothe] = (temp[0], temp[1], True, temp[3], temp[4])
 
                         if len(clothes):
                             log("-> Prendas vendidas:",*clothes)
 
                         with open("./database.db", "w") as dw:
                             json.dump(data,dw)
+                    else:
+                        print("Cancelado\n")
 
         elif selected == '3':
             with open("./database.db") as db:
@@ -138,7 +162,6 @@ if __name__ == "__main__":
         
         elif selected == '4':
 
-            print()
             with open("./sells.log", 'r') as s:
                 [print(line[:-1]) for line in s.readlines()]
 
