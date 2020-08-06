@@ -102,14 +102,15 @@ if __name__ == "__main__":
                         break
 
                     tot_price = 0
-                    
+                    sold = clothes[:]
+
                     for clothe in clothes:
                         if clothe not in data.keys():
-                            print(f"{clothe} No existe")
-                            clothes.remove(clothe)
+                            sold.remove(clothe)
+                            print(f"{clothe} -> No existe")
                         elif data[clothe][2]:
+                            sold.remove(clothe)
                             print(f"{data[clothe][4]} -> Ya esta vendido")
-                            clothes.remove(clothe)
                         else:
                             info = data[clothe][4]
                             price = float(data[clothe][0])
@@ -122,15 +123,25 @@ if __name__ == "__main__":
                     sure = input("Confirmar: ")
                     if(sure == ""):
                         print("OK\n")
-                        for clothe in clothes:
-                            temp = data[clothe]
-                            data[clothe] = (temp[0], temp[1], True, temp[3], temp[4])
+                        with open("./names.db",) as nm:
+                            names = json.load(nm)
+                            
+                            for clothe in sold:
+                                temp = data[clothe]
+                                
+                                names[temp[3]][4].append(clothe)
+                                names[temp[3]] = (names[temp[3]][0] + 1, names[temp[3]][1] + float(temp[0]), names[temp[3]][2] + float(temp[1]) - float(temp[1])*names[temp[3]][3]/100 , names[temp[3]][3], names[temp[3]][4])
 
-                        if len(clothes):
-                            log("-> Prendas vendidas:",*clothes)
+                                data[clothe] = (temp[0], temp[1], True, temp[3], temp[4])
 
-                        with open("./database.db", "w") as dw:
-                            json.dump(data,dw)
+                            if len(sold):
+                                log("-> Prendas vendidas:",*clothes)
+
+                            with open("./database.db", "w") as dw:
+                                json.dump(data,dw)
+
+                            with open("./names.db", "w") as nm:
+                                json.dump(names,nm)
                     else:
                         print("Cancelado\n")
 
@@ -144,21 +155,19 @@ if __name__ == "__main__":
                     cant = 0
                     total_gan = 0
                     total_dar = 0
-                    sold_out = []
-                    for no, clothe in enumerate(data.values(), 1):
-                        if clothe[2]:
-                            total += float(clothe[0])
-                            sold_out.append(no)
-                            names[clothe[3]][4].append(no)
-                            names[clothe[3]] = (names[clothe[3]][0] + 1, names[clothe[3]][1] + float(clothe[0]), names[clothe[3]][2] + float(clothe[1]), names[clothe[3]][3], names[clothe[3]][4])
-                            cant += 1
+                    sold_out = []           
 
                     print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres","Cantidad","Total", "Entregar", "Ganancia", "Prendas Vendidas"))
                     print("_"*80)
+                    
                     for name in names.items():            
-                        total_gan += name[1][1] - name[1][2] + name[1][2]*name[1][3]/100
-                        total_dar += name[1][2] - name[1][2]*name[1][3]/100
-                        print("%-20s%-10s%-10s%-10s%-10s" % (name[0], name[1][0], name[1][1], name[1][2] - name[1][2]*name[1][3]/100, name[1][1] - name[1][2] + name[1][2]*name[1][3]/100), *name[1][4])
+                        cant += name[1][0]
+                        total += name[1][1]
+                        total_gan += name[1][1] - name[1][2]
+                        total_dar += name[1][2]
+                        sold_out.extend(name[1][4])
+
+                        print("%-20s%-10s%-10s%-10s%-10s" % (name[0], name[1][0], name[1][1], name[1][2], name[1][1] - name[1][2]), *name[1][4])
                         
 
                     print("_"*80)
