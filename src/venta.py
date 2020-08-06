@@ -66,6 +66,11 @@ if __name__ == "__main__":
 
                                 prices = input(f"Añadir precios de articulo {curr_art} (Venta Costo): ").split()
                                 
+                                sure = input("Confirmar: ")
+                                if sure != "":
+                                    print("Cancelado\n")
+                                    continue
+
                                 try:
                                     if len(prices) == 2:
                                         data[curr_art] = (int(prices[0]), int(prices[1]), False, name, info)
