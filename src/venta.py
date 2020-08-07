@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logfile = open("./sells.log", "a")
 
     while True:
-        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\nEnter - Terminar\n-> ")
+        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\nEnter - Terminar\n-> ")
         print()
 
         if selected == "1":
@@ -181,5 +181,31 @@ if __name__ == "__main__":
 
             print()
             
+        elif selected == '5':
+            search = input("Prendas a Localizar: ")
+            search = search.split()
+
+            with open("./database.db") as db:
+                data = json.load(db)
+
+                for clothe in search:
+                    if clothe not in data.keys():
+                        print(f"{clothe}: No existe")
+                    elif data[clothe][2]:
+                        print(f"{clothe}: {data[clothe][4]} -> Ya esta vendido")
+                    else:
+                        info = data[clothe][4]
+                        name = data[clothe][3]
+                        if data[clothe][2]:
+                            sold = "Vendido"
+                        else:
+                            sold = "Sin vender"
+
+                        price = float(data[clothe][0])
+
+                        print(f'{clothe}: {info} - {name} ({sold}) -> {price}')
+
+            print()
+
         else:
             break
