@@ -42,7 +42,7 @@ if __name__ == "__main__":
                                     if gain == "":
                                         gain = 0
                                     elif int(gain) < 0 or int(gain) > 100:
-                                        print("Prociento incorrecto")
+                                        print("Porciento incorrecto")
                                         continue
                                     
                                     names[name] = (0, 0, 0, int(gain), [])
@@ -73,9 +73,9 @@ if __name__ == "__main__":
 
                                 try:
                                     if len(prices) == 2:
-                                        data[curr_art] = (int(prices[0]), int(prices[1]), False, name, info)
+                                        data[curr_art] = (float(prices[0]), float(prices[1]), False, name, info)
                                     else:
-                                        data[curr_art] = (int(prices[0]), int(prices[0]), False, name, info)
+                                        data[curr_art] = (float(prices[0]), float(prices[0]), False, name, info)
 
                                     print(f"Articulo Añadido Exitosamente \n")
 
