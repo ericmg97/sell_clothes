@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logfile = open("./sells.log", "a")
 
     while True:
-        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\nEnter - Terminar\n-> ")
+        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\n6- Inventario\nEnter - Terminar\n-> ")
         print()
 
         if selected == "1":
@@ -192,20 +192,66 @@ if __name__ == "__main__":
                     if clothe not in data.keys():
                         print(f"{clothe}: No existe")
                     elif data[clothe][2]:
-                        print(f"{clothe}: {data[clothe][4]} -> Ya esta vendido")
+                        info = data[clothe][4]
+                        name = data[clothe][3]
+                        price = float(data[clothe][0])
+                        print(f"{clothe}: {info} - {name} (Vendido) -> {price}")
                     else:
                         info = data[clothe][4]
                         name = data[clothe][3]
-                        if data[clothe][2]:
-                            sold = "Vendido"
-                        else:
-                            sold = "Sin vender"
-
                         price = float(data[clothe][0])
 
-                        print(f'{clothe}: {info} - {name} ({sold}) -> {price}')
+                        print(f'{clothe}: {info} - {name} (Sin Vender) -> {price}')
 
             print()
+        
+        elif selected == '6':          
+            
+            select = input("1 - Añadir prenda\n2 - Revisar inventario\n->")
+            print()
+            if select == '1':
+                while True:
+                    search = input("Prendas: ")
 
+                    if search == '':
+                        break
+
+                    search = search.split()
+
+                    with open("./database.db") as db:
+                        data = json.load(db)
+
+                        with open("./inventary.db") as inv: 
+                            inven = json.load(inv)
+
+                            for clothe in search:
+                                if clothe not in data.keys():
+                                    print(f"{clothe}: No existe")
+                                elif inven[clothe]:
+                                    print(f"{clothe}: -> Ya esta en inventario")
+                                else:
+                                    inven[clothe] = True
+                                    info = data[clothe][4]
+                                    price = float(data[clothe][0])
+
+                                    print(f'{clothe}: -> Añadido {info} - {data[clothe][3]} -> {price}')
+                            print()
+
+                        with open("./inventary.db", "w") as i:
+                            json.dump(inven, i)    
+            elif select == '2':
+                with open("./inventary.db") as inv: 
+                    inven = json.load(inv)
+                    with open("./database.db") as db:
+                        data = json.load(db)
+
+                        lost = []
+                        for i in inven.items():
+                            if not i[1]:
+                                lost.append(i[0])
+
+                        [print(f'{clothe}: -> {data[clothe][4]} - {data[clothe][3]} -> {float(data[clothe][0])} Vendido->{data[clothe][2]}') for clothe in lost]        
+
+                        print()
         else:
             break
