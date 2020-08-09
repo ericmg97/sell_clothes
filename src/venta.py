@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logfile = open("./sells.log", "a")
 
     while True:
-        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\n6- Inventario\nEnter - Terminar\n-> ")
+        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\nEnter - Terminar\n-> ")
         print()
 
         if selected == "1":
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         
         elif selected == '6':          
             
-            select = input("1 - Añadir prenda\n2 - Revisar inventario\n->")
+            select = input("1 - Añadir prenda\n2 - Revisar faltantes\n3 - Resumen por nombres\n->")
             print()
             if select == '1':
                 while True:
@@ -227,8 +227,10 @@ if __name__ == "__main__":
                             for clothe in search:
                                 if clothe not in data.keys():
                                     print(f"{clothe}: No existe")
-                                elif inven[clothe]:
-                                    print(f"{clothe}: -> Ya esta en inventario")
+                                elif inven[clothe] and data[clothe][2]:
+                                    print(f"{clothe}: -> Ya esta en inventario (Vendido)")
+                                elif inven[clothe] and not data[clothe][2]:
+                                    print(f"{clothe}: -> Ya esta en inventario (En almacen)")
                                 else:
                                     inven[clothe] = True
                                     info = data[clothe][4]
@@ -244,14 +246,57 @@ if __name__ == "__main__":
                     inven = json.load(inv)
                     with open("./database.db") as db:
                         data = json.load(db)
-
                         lost = []
-                        for i in inven.items():
-                            if not i[1]:
-                                lost.append(i[0])
+                        filter = input("Nombre: ")
+                        if filter == "todos": 
+                            for i in inven.items():
+                                if not i[1]:
+                                    lost.append(i[0])
+                        else:
+                            try:
+                                for i in inven.items():
+                                    if not i[1] and data[i[0]][3] == filter:
+                                        lost.append(i[0])
+                            except:
+                                pass
+                        
+                        if not len(lost):
+                            print("Todo en orden")
 
                         [print(f'{clothe}: -> {data[clothe][4]} - {data[clothe][3]} -> {float(data[clothe][0])} Vendido->{data[clothe][2]}') for clothe in lost]        
 
                         print()
+            elif select == '3':
+                with open("./inventary.db") as inv: 
+                    inven = json.load(inv)
+                    with open("./database.db") as db:
+                        data = json.load(db)
+                        with open("./names.db") as nm:
+                            names = json.load(nm)
+                            rep_name = {}
+                            rep_inv = {}
+                            for i, name in enumerate(names.items()):
+                                for cl in data.items():
+                                    if name[0] == cl[1][3]:
+                                        if name[0] not in rep_name:
+                                            rep_name[name[0]] = 0
+
+                                        rep_name[name[0]] += 1
+                                for cl in inven.items():
+                                    if name[0] == data[cl[0]][3] and cl[1]:
+                                        if name[0] not in rep_inv:
+                                            rep_inv[name[0]] = 0
+
+                                        rep_inv[name[0]] += 1
+
+                            
+                            for name in rep_name.items():
+                                total = name[1] 
+                                vendido = names[name[0]][0]
+                                inventario = rep_inv[name[0]]
+                                perdido = total - inventario
+                                print(f'{name[0]} Total:{total} Vendido: {vendido} Inventario: {inventario} Perdido: {perdido}')
+                
+                print()
         else:
-            break
+            break                  
