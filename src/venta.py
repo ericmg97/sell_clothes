@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
             with open("./database.db") as r:
                 data = json.load(r)
-                curr_art = len(data) + 1
+                curr_art = int(list(data.keys())[-1]) + 1
 
                 while True:
                     name = input("Dueño del articulo: ")
@@ -279,7 +279,7 @@ if __name__ == "__main__":
                                 for cl in data.items():
                                     if name[0] == cl[1][3]:
                                         rep_name[name[0]] += 1
-                                        
+
                                 for cl in inven.items():
                                     if name[0] == data[cl[0]][3] and cl[1]:
                                         rep_inv[name[0]] += 1
