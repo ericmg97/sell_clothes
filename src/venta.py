@@ -274,17 +274,14 @@ if __name__ == "__main__":
                             rep_name = {}
                             rep_inv = {}
                             for i, name in enumerate(names.items()):
+                                rep_inv[name[0]] = 0
+                                rep_name[name[0]] = 0
                                 for cl in data.items():
                                     if name[0] == cl[1][3]:
-                                        if name[0] not in rep_name:
-                                            rep_name[name[0]] = 0
-
                                         rep_name[name[0]] += 1
+                                        
                                 for cl in inven.items():
                                     if name[0] == data[cl[0]][3] and cl[1]:
-                                        if name[0] not in rep_inv:
-                                            rep_inv[name[0]] = 0
-
                                         rep_inv[name[0]] += 1
 
                             print("\n%-19s%-8s%-10s%-12s%-10s" % ("Nombres", "Total", "Vendido", "Inventario", "Perdido"))
