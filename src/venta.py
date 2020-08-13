@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logfile = open("./sells.log", "a")
 
     while True:
-        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\nEnter - Terminar\n-> ")
+        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Consultar Caja\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\n7 - Resumen de Ventas Personales\nEnter - Terminar\n-> ")
         print()
 
         if selected == "1":
@@ -298,5 +298,17 @@ if __name__ == "__main__":
                                 print(f'{name[0]} Total:{total} Vendido: {vendido} Inventario: {inventario} Perdido: {perdido}')
                 
                 print()
+        elif selected == '7':
+            inp = input("Nombre: ")
+            with open('./database.db') as db:
+                data = json.load(db)
+                total = 0
+                for cl in data.items():
+                    if cl[1][2] and cl[1][3] == inp:
+                        print(f"{cl[1][4]} -> {cl[1][1]}")
+                        total += cl[1][1]
+                
+                print(f"\nTotal: {total} \n")
         else:
-            break                  
+            break
+        
