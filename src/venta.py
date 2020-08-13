@@ -226,11 +226,9 @@ if __name__ == "__main__":
 
                             for clothe in search:
                                 if clothe not in data.keys():
-                                    print(f"{clothe}: No existe")
-                                elif inven[clothe] and data[clothe][2]:
-                                    print(f"{clothe}: -> Ya esta en inventario (Vendido)")
-                                elif inven[clothe] and not data[clothe][2]:
-                                    print(f"{clothe}: -> Ya esta en inventario (En almacen)")
+                                    print(f"{clothe}: -> No existe")
+                                elif inven[clothe]:
+                                    print(f"{clothe}: -> Ya esta en inventario")
                                 else:
                                     inven[clothe] = True
                                     info = data[clothe][4]
@@ -289,14 +287,14 @@ if __name__ == "__main__":
 
                                         rep_inv[name[0]] += 1
 
-                            print("\n%-19s%-8s%-10s%-12s%-10s" % ("Nombres","Total","Vendido", "Inventario", "Perdido"))
+                            print("\n%-19s%-8s%-10s%-12s%-10s" % ("Nombres", "Total", "Vendido", "Inventario", "Perdido"))
                             print("_"*62)
                             
                             for name in rep_name.items():
                                 total = name[1] 
                                 vendido = names[name[0]][0]
                                 inventario = rep_inv[name[0]]
-                                perdido = total - inventario
+                                perdido = total - vendido - inventario
 
                                 print("%-20s%-10s%-10s%-12s%-10s" % (name[0], total, vendido, inventario, perdido))
 
