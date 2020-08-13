@@ -289,14 +289,20 @@ if __name__ == "__main__":
 
                                         rep_inv[name[0]] += 1
 
+                            print("\n%-19s%-8s%-10s%-12s%-10s" % ("Nombres","Total","Vendido", "Inventario", "Perdido"))
+                            print("_"*62)
                             
                             for name in rep_name.items():
                                 total = name[1] 
                                 vendido = names[name[0]][0]
                                 inventario = rep_inv[name[0]]
                                 perdido = total - inventario
-                                print(f'{name[0]} Total:{total} Vendido: {vendido} Inventario: {inventario} Perdido: {perdido}')
-                
+
+                                print("%-20s%-10s%-10s%-12s%-10s" % (name[0], total, vendido, inventario, perdido))
+
+                            print("_"*62)
+                            print()
+
                 print()
         elif selected == '7':
             inp = input("Nombre: ")
