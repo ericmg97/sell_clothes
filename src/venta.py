@@ -312,4 +312,3 @@ if __name__ == "__main__":
                 print(f"\nTotal: {total} \n")
         else:
             break
-        
