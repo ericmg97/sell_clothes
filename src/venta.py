@@ -306,7 +306,7 @@ if __name__ == "__main__":
                 total = 0
                 for cl in data.items():
                     if cl[1][2] and cl[1][3] == inp:
-                        print(f"{cl[1][4]} -> {cl[1][1]}")
+                        print(f"{cl[0]}: {cl[1][4]} -> {cl[1][1]}")
                         total += cl[1][1]
                 
                 print(f"\nTotal: {total} \n")
