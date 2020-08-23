@@ -56,10 +56,10 @@ def add_article(path):
                     try:
                         if len(prices) == 2:
                             data[curr_art] = (float(prices[0]), float(
-                                prices[1]), False, name, info)
+                                prices[1]), False, name, info, True, False)
                         else:
                             data[curr_art] = (float(prices[0]), float(
-                                prices[0]), False, name, info)
+                                prices[0]), False, name, info, True, False)
 
                         print(f"Articulo Añadido Exitosamente \n")
 
@@ -85,7 +85,7 @@ def add_name(path, name):
                     print("Porciento incorrecto")
                     continue
 
-                names[name] = (0, 0, 0, int(gain), [])
+                names[name] = ([0], [0], [0], int(gain), [[]])
                 with open(f"{path}_names.db", "w") as nm:
                     json.dump(names, nm)
 
@@ -132,12 +132,12 @@ def sell_article(path):
                     for clothe in sold:
                         temp = data[clothe]
 
-                        names[temp[3]][4].append(clothe)
-                        names[temp[3]] = (names[temp[3]][0] + 1, names[temp[3]][1] + float(temp[0]), names[temp[3]][2] + float(
-                            temp[1]) - float(temp[1])*names[temp[3]][3]/100, names[temp[3]][3], names[temp[3]][4])
+                        names[temp[3]][4][-1].append(clothe)
+                        names[temp[3]] = (names[temp[3]][0][-1] + 1, names[temp[3]][1][-1] + float(temp[0]), names[temp[3]][2][-1] + float(
+                            temp[1]) - float(temp[1])*names[temp[3]][3][-1]/100, names[temp[3]][3][-1], names[temp[3]][4][-1])
 
                         data[clothe] = (temp[0], temp[1],
-                                        True, temp[3], temp[4])
+                                        True, temp[3], temp[4], temp[5], True)
 
                     if len(sold):
                         log(f"{path}.log", "-> Prendas vendidas:", *clothes)
