@@ -1,24 +1,22 @@
 from utils import *
+import os.path
 
-if __name__ == "__main__":
-    names = {}
-    logfile = open("./sells.log", "a")
-
+def temp(name, venta):
     while True:
-        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Resumen\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\n7 - Resumen de Ventas Personales\nEnter - Terminar\n-> ")
+        selected = input("1 - Añadir Articulos \n2 - Vender Articulos \n3 - Resumen\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\n7 - Resumen de Ventas Personales\nEnter - Cerrar Sesion\n-> ")
         print()
 
         if selected == "1":
-            add_article()
+            add_article(create_path(name,venta))
            
         elif selected == "2":
-            sell_article()
+            sell_article(create_path(name,venta))
 
         elif selected == '3':
-            resume()
+            resume(create_path(name,venta))
         
         elif selected == '4':
-            print_log()
+            print_log(create_path(name,venta))
             print()
             
         elif selected == '5':
@@ -26,7 +24,7 @@ if __name__ == "__main__":
             search = search.split()
 
             for clothe in search:
-                print(search_article(clothe)[2])
+                print(search_article(create_path(name,venta), clothe)[2])
             
             print()
         
@@ -137,4 +135,86 @@ if __name__ == "__main__":
                 print(f"\nTotal: {total} \n")
         else:
             break
+
+
+if __name__ == "__main__":
+    while True:
+        action = input("1 - Autenticarse \n2 - Registrar Usuario \nEnter - Salir\n-> ")
+        if action == "1":
+            while True:
+                name = input("Escribe tu nombre: ")
+
+    	        with open("./users.db") as us:
+                    users = json.load(us)
+
+                    if name == "":
+                        print()
+                        break
+
+                    elif name in users:
+                            option = input("1 - Acceder a venta existente\n2 - Crear nueva venta\n-> ")
+
+                            if option == "1": 
+                                while True: 
+                                    venta = input("\nNombre: ")
+                                    if venta == "":
+                                        print()
+                                        break
+                                    elif venta in users[name]:
+                                        temp(name, venta)
+                                    else:
+                                        print("Nombre de venta inexistente \n")
+                                        
+                            elif option == "2":
+                                create_sales(name)
+                            else:
+                                print()
+                                break
+                    else:
+                        print("Usuario inexistente\n")
+
+        elif action == "2":
+            name = input("Escribe tu nombre: ")
+            
+            if name == "":
+                print("Cancelado\n")
+            else:
+                with open("./users.db") as us:
+                    users = json.load(us)
+                    if name in users:
+                        print("Su nombre ya esta registrado, intente con uno diferente.")
+                    else:
+                        create_sales(name)
+
+        else:
+            pass
                     
+
+def create_sales(name):
+    with open("./users.db") as us:
+        users = json.load(us)
+
+        while True:
+            venta = input("\nNombre su venta: ")
+            if venta == "":
+                print("Nombre no valido, intente con uno diferente")
+                continue
+            elif venta in users:
+                print("Nombre existente, intente con uno diferente")
+                continue
+            else:
+                users[name] = [venta]
+
+            with open(f"./{name}_1.db", "w") as db:
+                json.dump({},db)
+            
+            with open(f"./{name}_1.log", "w") as log:
+                json.dump({},log)
+
+            with open(f"./{name}_1_names.db", "w") as names:
+                json.dump({},names)
+            
+            with open("./users.db", "w") as user:
+                json.dump(users,user)
+
+            break

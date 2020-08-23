@@ -1,10 +1,10 @@
 import json
 import time
 
-def log(*args, **kwargs):
+def log(path, *args, **kwargs):
     date = time.asctime(time.localtime())
 
-    kwargs.update(dict(file=logfile))
+    kwargs.update(dict(file=path))
     print(
         f"{date}",
         *args,
@@ -12,8 +12,11 @@ def log(*args, **kwargs):
     )
     logfile.flush()
 
-def add_article():
-     with open("./database.db") as r:
+def create_path(name,venta,option):
+    return f'./{name}_{venta}'
+
+def add_article(path):
+     with open(f"{path}.db") as r:
         data = json.load(r)
         curr_art = int(list(data.keys())[-1]) + 1
 
@@ -24,7 +27,7 @@ def add_article():
                 return
             
             if name not in names:
-                add_name(name)
+                add_name(path, name)
             else:
                 print()
             
@@ -50,7 +53,7 @@ def add_article():
 
                     print(f"Articulo Añadido Exitosamente \n")
 
-                    with open("./database.db", "w") as db:
+                    with open(f"{path}.db", "w") as db:
                         json.dump(data,db)
 
                     curr_art += 1
@@ -58,8 +61,8 @@ def add_article():
                     print("Los datos introducidos son incorrectos. Cancelado\n")
                     pass
                 
-def add_name(name):
-    with open("./names.db") as nm:
+def add_name(path, name):
+    with open(f"{path}_names.db") as nm:
         names = json.load(nm)
         
         while True:
@@ -72,7 +75,7 @@ def add_name(name):
                     continue
                 
                 names[name] = (0, 0, 0, int(gain), [])
-                with open("./names.db", "w") as nm:
+                with open(f"{path}_names.db", "w") as nm:
                     json.dump(names,nm)
 
                 print()
@@ -80,7 +83,7 @@ def add_name(name):
             except:
                 print("Porciento incorrecto -> (0-100)")
 
-def sell_article():
+def sell_article(path):
     while True:
         clothes = input("Prendas a vender:")
         clothes = clothes.split()
@@ -108,10 +111,10 @@ def sell_article():
         if(sure == ""):
             print("OK\n")
 
-            with open("./database.db") as db:
+            with open(f"{path}.db") as db:
                 data = json.load(db)
                 
-                with open("./names.db",) as nm:
+                with open(f"{path}_names.db",) as nm:
                     names = json.load(nm)
                     
                     for clothe in sold:
@@ -123,19 +126,19 @@ def sell_article():
                         data[clothe] = (temp[0], temp[1], True, temp[3], temp[4])
 
                     if len(sold):
-                        log("-> Prendas vendidas:",*clothes)
+                        log(f"{path}.log","-> Prendas vendidas:",*clothes)
 
-                    with open("./database.db", "w") as dw:
+                    with open(f"{path}.db", "w") as dw:
                         json.dump(data,dw)
 
-                    with open("./names.db", "w") as nm:
+                    with open(f"{path}_names.db", "w") as nm:
                         json.dump(names,nm)
         else:
             print("Cancelado\n")
 
 
-def search_article(art):
-    with open("./database.db") as db:
+def search_article(path, art):
+    with open(f"{path}.db") as db:
         data = json.load(db)
 
         try:
@@ -150,12 +153,12 @@ def search_article(art):
         except:
             return (False, None, f"{art}: No existe")
 
-def resume():
-    with open("./database.db") as db:
-        with open("./names.db") as nm:
+def resume(path):
+    with open(f"{path}.db") as db:
+        with open(f"{path}_names.db") as nm:
             names = json.load(nm)
             data = json.load(db)
-            
+
             total = 0
             cant = 0
             total_gan = 0
@@ -179,6 +182,6 @@ def resume():
             print("%-20s%-10s%-10s%-10s%-10s" % ("General",cant,total,total_dar,total_gan), *sold_out)
             print()
 
-def print_log():
-    with open("./sells.log", 'r') as s:
+def print_log(path):
+    with open(f"{path}.log") as s:
         [print(line[:-1]) for line in s.readlines()]
