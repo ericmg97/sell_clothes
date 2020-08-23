@@ -22,7 +22,11 @@ def create_path(name, venta):
 def add_article(path):
     with open(f"{path}.db") as r:
         data = json.load(r)
-        curr_art = int(list(data.keys())[-1]) + 1
+        
+        try:
+            curr_art = int(list(data.keys())[-1]) + 1
+        except:
+            curr_art = 1
 
         while True:
             name = input("Dueño del articulo: ")
@@ -152,6 +156,192 @@ def sell_article(path):
         else:
             print("Cancelado\n")
 
+def resume(path):
+    while(True):
+        sel = input("Cortes a resumir: ")
+        if sel == "":
+            print()
+            return
+
+        try:
+            cuts = {int(x) - 1 for x in sel.split()}
+        except:
+            print("Cortes inexistentes\n")
+
+        with open(f"{path}.db") as db:
+            with open(f"{path}_names.db") as nm:
+                names = json.load(nm)
+                data = json.load(db)
+                    
+                total = 0
+                cant = 0
+                total_gan = 0
+                total_dar = 0
+                sold_out = []
+
+                print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres", "Cantidad",
+                                                            "Total", "Entregar", "Ganancia", "Prendas Vendidas"))
+                print("_"*80)
+
+                for name in names.items():
+                    total_name = [0,0,0,0,[]]
+
+                    for cut in cuts:
+                        cant += name[1][0][cut]
+                        total += name[1][1][cut]
+                        total_gan += name[1][1][cut] - name[1][2][cut]
+                        total_dar += name[1][2][cut]
+                        sold_out.extend(name[1][4][cut])
+
+                        total_name[0] += name[1][0][cut]
+                        total_name[1] += name[1][1][cut]
+                        total_name[2] += name[1][2][cut]
+                        total_name[4].extend(name[1][4][cut])
+
+                    print("%-20s%-10s%-10s%-10s%-10s" %
+                        (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]), *total_name[4])
+
+                print("_"*80)
+                print("%-20s%-10s%-10s%-10s%-10s" %
+                    ("General", cant, total, total_dar, total_gan), *sold_out)
+                print()
+
+def create_sales(name):
+    with open("./users.db") as us:
+        users = json.load(us)
+
+        while True:
+            venta = input("\nNombre su venta: ")
+            if venta == "":
+                print("Nombre no valido, intente con uno diferente")
+                continue
+            elif name not in users:
+                users[name] = [venta]
+            elif venta in users[name]:
+                print("Nombre existente, intente con uno diferente")
+                continue
+            else:
+                users[name].append(venta)
+
+            path = create_path(name,venta)
+
+            with open(f"{path}.db", "w") as db:
+                json.dump({}, db)
+
+            with open(f"{path}.log", "w") as log:
+                json.dump({}, log)
+
+            with open(f"{path}_names.db", "w") as names:
+                json.dump({}, names)
+
+            with open("./users.db", "w") as user:
+                json.dump(users, user)
+                        
+            print("Venta creada exitosamente. \n")
+            break
+
+def inventary(path): #falta
+    while True:
+        opt = input("1 - Realizar Inventario\n2 - Revisar faltantes \n3 - Borrar Inventario\n-> ")
+        print()
+        
+        if opt == "1":
+            while True:
+                ad = input("Añadir prenda: ")
+                if ad == "":
+                    print()
+                    break
+                else:
+                    list_art = ad.split()
+                    ad_art = []
+                    for art in list_art:
+                        search = search_article(art)
+                        if search[0]:
+                            ad_art.append(art)
+                            
+                        print(search[2])
+                    
+                    sure = input("Seguro: ")
+                    if sure == "":
+                        with open(f"{path}.db") as db:
+                            data = json.load(db)
+
+                            for cl in ad_art:
+                                data[cl][6] = True
+
+                            with open(f"{path}.db", "w") as d:
+                                json.dump(data, d)
+
+                        print("Prendas añadidas correctamente. \ns")
+                    else:
+                        print("Cancelado.\n")
+                        continue
+        elif opt == "2":
+            pass
+            # with open("./inventary.db") as inv:
+            #     inven = json.load(inv)
+            #     with open("./database.db") as db:
+            #         data = json.load(db)
+            #         lost = []
+            #         filter = input("Nombre: ")
+            #         if filter == "todos":
+            #             for i in inven.items():
+            #                 if not i[1]:
+            #                     lost.append(i[0])
+            #         else:
+            #             try:
+            #                 for i in inven.items():
+            #                     if not i[1] and data[i[0]][3] == filter:
+            #                         lost.append(i[0])
+            #             except:
+            #                 pass
+
+            #         if not len(lost):
+            #             print("Todo en orden")
+
+            #         [print(f'{clothe}: -> {data[clothe][4]} - {data[clothe][3]} -> {float(data[clothe][0])} Vendido->{data[clothe][2]}')
+            #             for clothe in lost]
+
+            #         print()             
+        elif opt == "3":
+            sure = input("Estas serguro: ")
+            
+            if sure == "":
+                with open(f"{path}.db") as db:
+                    data = json.load(db)
+
+                    for cl in data:
+                        if data[cl][5] and not data[cl][2]:
+                            data[cl][6] = False
+                    
+                    with open(f"{path}.db", "w") as d:
+                        json.dump(data,d)
+                
+                print("Inventario borrado correctamente. \n")
+            else:
+                print("Cancelado. \n")
+
+        else:
+            print()
+            return
+
+def advanced_search(path):
+    while True:
+        typ = input("1 - Busqueda por numero\n2 - Busqueda por nombre\n-> ")
+        print()
+
+        if typ == "1":
+            search = input("Prendas a Localizar: ")
+            search = search.split()
+
+            for clothe in search:
+                print(search_article(path, clothe)[2])
+
+            print()
+        elif typ == "2":
+            pass #implementar busqueda por nombre
+        else:
+            return
 
 def search_article(path, art):
     with open(f"{path}.db") as db:
@@ -163,191 +353,72 @@ def search_article(path, art):
             price = float(data[art][0])
 
             if not data[art][5]:
-                return (False, None, f"{art}: {name} - {info} -> {price} (Devuelto)")
+                return (False, data[art][:], f"{art}: {name} - {info} -> {price} (Devuelto)")
             elif data[art][2]:
-                return (False, data[art], f"{art}: {name} - {info} -> {price} (Vendido)")
+                return (False, data[art][:], f"{art}: {name} - {info} -> {price} (Vendido)")
+            elif data[art][6]:
+                return (True, data[art][:], f"{art}: {name} - {info} -> {price} (En inventario)")
             else:
-                return (True, data[art], f"{art}: {name} - {info} -> {price}")
+                return (True, data[art][:], f"{art}: {name} - {info} -> {price}")
 
         except:
             return (False, None, f"{art}: No existe")
 
-
-def resume(path):
-    with open(f"{path}.db") as db:
+def make_cut(path):
+    sure = input("Estas seguro: ")
+    if sure == "":
         with open(f"{path}_names.db") as nm:
             names = json.load(nm)
-            data = json.load(db)
 
-            total = 0
-            cant = 0
-            total_gan = 0
-            total_dar = 0
-            sold_out = []
+            for name in names:
+                names[name][0].append(0)
+                names[name][1].append(0)
+                names[name][2].append(0)
+                names[name][4].append([])
 
-            print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres", "Cantidad",
-                                                        "Total", "Entregar", "Ganancia", "Prendas Vendidas"))
-            print("_"*80)
+            with open(f"{path}_names.db", "w") as n:
+                json.dump(names,n)
 
-            for name in names.items():
-                cant += name[1][0]
-                total += name[1][1]
-                total_gan += name[1][1] - name[1][2]
-                total_dar += name[1][2]
-                sold_out.extend(name[1][4])
-
-                print("%-20s%-10s%-10s%-10s%-10s" %
-                      (name[0], name[1][0], name[1][1], name[1][2], name[1][1] - name[1][2]), *name[1][4])
-
-            print("_"*80)
-            print("%-20s%-10s%-10s%-10s%-10s" %
-                  ("General", cant, total, total_dar, total_gan), *sold_out)
-            print()
-
-
-def print_log(path):
-    with open(f"{path}.log") as s:
-        [print(line[:-1]) for line in s.readlines()]
-
-
-def create_sales(name):
-    with open("./users.db") as us:
-        users = json.load(us)
-
-        while True:
-            venta = input("\nNombre su venta: ")
-            if venta == "":
-                print("Nombre no valido, intente con uno diferente")
-                continue
-            elif venta in users[name]:
-                print("Nombre existente, intente con uno diferente")
-                continue
-            else:
-                users[name].append(venta)
-
-            with open(f"./{name}_{venta}.db", "w") as db:
-                json.dump({}, db)
-
-            with open(f"./{name}_{venta}.log", "w") as log:
-                json.dump({}, log)
-
-            with open(f"./{name}_{venta}_names.db", "w") as names:
-                json.dump({}, names)
-
-            with open("./users.db", "w") as user:
-                json.dump(users, user)
-                        
-            print("Venta creada exitosamente. \n")
-            break
+            print("Corte realizado correctamente.")
+        
+    else:
+        print("Cancelado\n")
 
 def temp(name, venta):
     while True:
-        selected = input("\n1 - Añadir Articulos \n2 - Vender Articulos \n3 - Realizar corte\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\n7 - Resumen de Ventas Personales\nEnter - Cerrar Sesion\n-> ")
+        selected = input("\n1 - Añadir Articulos \n2 - Vender Articulos \n3 - Buscar Articulos\n4 - Inventario\n5 - Organizacion de ventas\n6 - Resumen por nombres\nEnter - Cerrar Sesion\n-> ")
         print()
+        
+        path = create_path(name,venta)
 
         if selected == "1":
-            add_article(create_path(name, venta))
+            add_article(path)
 
         elif selected == "2":
-            sell_article(create_path(name, venta))
+            sell_article(path)
 
         elif selected == '3':
-            sure = input("Estas seguro: ")
-            if sure == "":
-                with open(f"./{name}_{venta}_names.db") as nm:
-                    names = json.load(nm)
-
-                    for name in names:
-                        names[name][0].append(0)
-                        names[name][1].append(0)
-                        names[name][2].append(0)
-                        names[name][4].append([])
-
-                    with open(f"./{name}_{venta}_names.db", "w") as n:
-                        json.dump(names,n)
-
-                    print("Corte realizado correctamente.")
-               
-            else:
-                print("Cancelado\n")
+            advanced_search(path)
 
         elif selected == '4':
-            print_log(create_path(name, venta))
-            print()
+            inventary(path)
 
         elif selected == '5':
-            search = input("Prendas a Localizar: ")
-            search = search.split()
-
-            for clothe in search:
-                print(search_article(create_path(name, venta), clothe)[2])
-
+            sel = input("1 - Realizar Corte \n2 - Resumen de ventas \n-> ")
             print()
-
+            
+            if sel == "1":
+                make_cut(path)
+            elif sel == "2":
+                resume(path)
+            
         elif selected == '6':
 
             select = input(
-                "1 - Añadir prenda\n2 - Revisar faltantes\n3 - Resumen por nombres\n->")
+                "3 - Resumen por nombres\n->")
             print()
-            if select == '1':
-                while True:
-                    search = input("Prendas: ")
 
-                    if search == '':
-                        break
-
-                    search = search.split()
-
-                    with open("./database.db") as db:
-                        data = json.load(db)
-
-                        with open("./inventary.db") as inv:
-                            inven = json.load(inv)
-
-                            for clothe in search:
-                                if clothe not in data.keys():
-                                    print(f"{clothe}: -> No existe")
-                                elif inven[clothe]:
-                                    print(
-                                        f"{clothe}: -> Ya esta en inventario")
-                                else:
-                                    inven[clothe] = True
-                                    info = data[clothe][4]
-                                    price = float(data[clothe][0])
-
-                                    print(
-                                        f'{clothe}: -> Añadido {info} - {data[clothe][3]} -> {price}')
-                            print()
-
-                        with open("./inventary.db", "w") as i:
-                            json.dump(inven, i)
-            elif select == '2':
-                with open("./inventary.db") as inv:
-                    inven = json.load(inv)
-                    with open("./database.db") as db:
-                        data = json.load(db)
-                        lost = []
-                        filter = input("Nombre: ")
-                        if filter == "todos":
-                            for i in inven.items():
-                                if not i[1]:
-                                    lost.append(i[0])
-                        else:
-                            try:
-                                for i in inven.items():
-                                    if not i[1] and data[i[0]][3] == filter:
-                                        lost.append(i[0])
-                            except:
-                                pass
-
-                        if not len(lost):
-                            print("Todo en orden")
-
-                        [print(f'{clothe}: -> {data[clothe][4]} - {data[clothe][3]} -> {float(data[clothe][0])} Vendido->{data[clothe][2]}')
-                         for clothe in lost]
-
-                        print()
-            elif select == '3':
+            if select == '3':
                 with open("./inventary.db") as inv:
                     inven = json.load(inv)
                     with open("./database.db") as db:
