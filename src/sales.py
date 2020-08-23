@@ -7,12 +7,12 @@ class sales:
 
     def __call__(self):
         while True:
-            selected = input("\n1 - Articulos\n2 - Inventario \n3 - Organizacion de venta\n4 - Resumen por nombres\nEnter - Cerrar Sesion\n-> ")
+            selected = input("\n1 - Articulos\n2 - Inventario \n3 - Organizacion de venta\n4 - Resumen por nombres\nEnter - Salir\n-> ")
             print()
             
 
             if selected == "1":
-                opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \n-> ")
+                opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \nEnter - Atras\n-> ")
                 print()
                 
                 if opt == "1":
@@ -35,7 +35,7 @@ class sales:
                 self.inventory()
 
             elif selected == "3":
-                sel = input("1 - Realizar Corte \n2 - Resumen de ventas \n-> ")
+                sel = input("1 - Realizar Corte \n2 - Resumen de ventas \nEnter - Atras\n-> ")
                 print()
                 
                 if sel == "1":
@@ -43,14 +43,9 @@ class sales:
                 elif sel == "2":
                     self.resume()
                 
-            elif selected == '4': #organizar y terminar
-
-                select = input("Nombre: ")
-
-                if select == "todos":
-                    self.resume_names(True)
-                else:
-                    self.resume_names()
+            elif selected == '4':
+                select = input("Nombre: ")          
+                self.resume_names(select)
 
             else:
                 break
@@ -333,15 +328,67 @@ class sales:
                 except:
                     pass
 
-            if not len(lost):
-                print("Todo en orden")
-
             [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])}')
                 for clothe in lost]
 
             print(f"\nTotal: {len(lost)}")
 
             print()  
+
+    def check_inventory(self, name):
+            with open(f"{self.path}.db") as db:
+                data = json.load(db)
+            
+            inven = []
+                      
+            try:
+                for cl in data.items():
+                    if cl[1][5] and not cl[1][2] and cl[1][6] and cl[1][3] == name:
+                        inven.append(cl[0])
+            except:
+                pass
+
+            [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])}')
+                for clothe in inven]
+
+            print(f"\nTotal: {len(inven)}")
+
+            print()  
+
+    def check_sold(self, name):
+        with open(f"{self.path}.db") as db:
+            data = json.load(db)
+            
+            total = 0
+            cant = 0
+
+            for cl in data.items():
+                if cl[1][2] and cl[1][3] == name:
+                    print(f"{cl[0]}: {cl[1][4]} -> {cl[1][1]}")
+                    cant += 1
+                    total += cl[1][1]
+
+            print(f"\nTotal: {cant} \nValor: {total} \n")
+
+    def check_returned_to_owners(self, name):
+        with open(f"{self.path}.db") as db:
+            data = json.load(db)
+            
+            inven = []
+                      
+            try:
+                for cl in data.items():
+                    if not cl[1][5] and not cl[1][2] and cl[1][3] == name:
+                        inven.append(cl[0])
+            except:
+                pass
+
+            [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])}')
+                for clothe in inven]
+
+            print(f"\nTotal: {len(inven)}")
+
+            print() 
 
     def return_clothe_to_owner(self):
         owner = input("Nombre: ")
@@ -406,18 +453,6 @@ class sales:
                 print()
                 return
 
-    def sold_for_name(self, name):
-        with open(f"{self.path}.db") as db:
-            data = json.load(db)
-            
-            total = 0
-            for cl in data.items():
-                if cl[1][2] and cl[1][3] == inp:
-                    print(f"{cl[0]}: {cl[1][4]} -> {cl[1][1]}")
-                    total += cl[1][1]
-
-            print(f"\nTotal: {total} \n")
-
     def advanced_search(self): #terminar
         while True:
             typ = input("1 - Busqueda por numero de serie\n2 - Busqueda por nombre\n-> ")
@@ -477,41 +512,56 @@ class sales:
         else:
             print("Cancelado\n")
 
-    def resume_names(self, all = False):
-    
-        if all:    
-            rep_name = {}
-            rep_inv = {}
-            for i, name in enumerate(names.items()):
-                rep_inv[name[0]] = 0
-                rep_name[name[0]] = 0
-                for cl in data.items():
-                    if name[0] == cl[1][3]:
-                        rep_name[name[0]] += 1
+    def resume_names(self, name):
 
-                for cl in inven.items():
-                    if name[0] == data[cl[0]][3] and cl[1]:
-                        rep_inv[name[0]] += 1
+        if name == "todos":    
+            with open(f"{self.path}_names.db") as nm:
+                names = json.load(nm)
+                with open(f"{self.path}.db") as db:
+                    data = json.load(db)
 
-            print("\n%-19s%-8s%-10s%-12s%-10s" % ("Nombres",
-                                                "Total", "Vendido", "Inventario", "Perdido"))
-            print("_"*62)
+                    rep_name = {}
+                    rep_inv = {}
+                    rep_returned = {}
+                    for i, name in enumerate(names.items()):
+                        
+                        rep_inv[name[0]] = 0
+                        rep_returned[name[0]] = 0
+                        rep_name[name[0]] = 0
 
-            for name in rep_name.items():
-                total = name[1]
-                vendido = names[name[0]][0]
-                inventario = rep_inv[name[0]]
-                perdido = total - vendido - inventario
+                        for cl in data.items():
+                            if name[0] == cl[1][3]:
+                                rep_name[name[0]] += 1
+                                if not cl[1][2] and cl[1][5] and cl[1][6]:
+                                    rep_inv[name[0]] += 1
+                                elif not cl[1][5] and not cl[1][2]:
+                                    rep_returned[name[0]] += 1
+                                
+                    print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
+                                                        "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
+                    print("_"*90)
 
-                print("%-20s%-10s%-10s%-12s%-10s" %
-                    (name[0], total, vendido, inventario, perdido))
+                for name in rep_name.items():
+                    total = name[1]
+                    vendido = 0
+                    for cut in names[name[0]][0]:
+                        vendido += cut
 
-            print("_"*62)
-            print()
+                    inventario = rep_inv[name[0]]
+                    entregado = rep_returned[name[0]]
 
-        else:
-            
-            inp = input("Nombre: ")
-            
+                    print("%-20s%-10s%-10s%-12s%-10s%-10s" %
+                        (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
+
+                print("_"*90)
+                print()
+
+        else:     
             print("\nPrendas Vendidas: ")
-            self.sold_for_name(self.self.path,inp)
+            self.check_sold(name)        
+
+            print("\nPrendas En Inventario: ")
+            self.check_inventory(name)
+
+            print("\nPrendas Devueltas:")
+            self.check_returned_to_owners(name)
