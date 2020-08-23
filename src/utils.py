@@ -14,10 +14,8 @@ def log(path, *args, **kwargs):
     logfile.flush()
     logfile.close()
 
-
 def create_path(name, venta):
     return f'./{name}_{venta}'
-
 
 def add_article(path):
     with open(f"{path}.db") as r:
@@ -76,6 +74,43 @@ def add_article(path):
                         print("Los datos introducidos son incorrectos. Cancelado\n")
                         pass
 
+def change_prices(path):
+    while True:
+        art = input("Numero de serie: ")
+        print()
+        
+        if art == "":
+            print()
+            break
+
+        cl = search_article(path,art)
+
+        with open(f"{path}.db") as r:
+            data = json.load(r)
+
+            if cl[0]:
+                print(f"{cl[2]} {data[art][1]}")
+                prices = input("Nuevos Precios (Venta Costo): ").split()
+                
+                try:
+                    if len(prices) == 2:
+                        data[art][0] = float(prices[0])
+                        data[art][1] = float(prices[1])
+                    else:
+                        data[art][0] = float(prices[0])
+                        data[art][1] = float(prices[0])
+
+                    print(f"Precios cambiados exitosamente \n")
+
+                    with open(f"{path}.db", "w") as db:
+                        json.dump(data, db)
+
+                except:
+                    print("Los datos introducidos son incorrectos. Cancelado\n")
+                    pass
+            else:
+                print(cl[2])
+                print("No se pueden modificar sus precios\n")
 
 def add_name(path, name):
     with open(f"{path}_names.db") as nm:
@@ -98,7 +133,6 @@ def add_name(path, name):
                 break
             except:
                 print("Porciento incorrecto -> (0-100)")
-
 
 def sell_article(path):
     while True:
@@ -156,7 +190,10 @@ def sell_article(path):
         else:
             print("Cancelado\n")
 
-def resume(path):
+def return_article(path): #terminar
+    pass
+
+def resume(path): #mejorar
     while(True):
         sel = input("Cortes a resumir: ")
         if sel == "":
@@ -240,9 +277,9 @@ def create_sales(name):
             print("Venta creada exitosamente. \n")
             break
 
-def inventary(path): #falta
+def inventory(path): 
     while True:
-        opt = input("1 - Realizar Inventario\n2 - Revisar faltantes \n3 - Borrar Inventario\n-> ")
+        opt = input("1 - Realizar Inventario\n2 - Revisar faltantes \n3 - Entregar ropa al dueño\n4 - Borrar Inventario\n-> ")
         print()
         
         if opt == "1":
@@ -276,34 +313,52 @@ def inventary(path): #falta
                     else:
                         print("Cancelado.\n")
                         continue
-        elif opt == "2":
-            pass
-            # with open("./inventary.db") as inv:
-            #     inven = json.load(inv)
-            #     with open("./database.db") as db:
-            #         data = json.load(db)
-            #         lost = []
-            #         filter = input("Nombre: ")
-            #         if filter == "todos":
-            #             for i in inven.items():
-            #                 if not i[1]:
-            #                     lost.append(i[0])
-            #         else:
-            #             try:
-            #                 for i in inven.items():
-            #                     if not i[1] and data[i[0]][3] == filter:
-            #                         lost.append(i[0])
-            #             except:
-            #                 pass
+        elif opt == "2":        
+            with open(f"{path}.db") as db:
+                data = json.load(db)
+                
+                lost = []
+                filter = input("Nombre: ")
+                if filter == "todos":
+                    for cl in data.items():
+                        if cl[1][5] and not cl[1][6]:
+                            lost.append(cl[0])
+                else:
+                    try:
+                        for cl in data.items():
+                            if cl[1][5] and not cl[1][6] and cl[1][3] == filter:
+                                lost.append(cl[0])
+                    except:
+                        pass
 
-            #         if not len(lost):
-            #             print("Todo en orden")
+                if not len(lost):
+                    print("Todo en orden")
 
-            #         [print(f'{clothe}: -> {data[clothe][4]} - {data[clothe][3]} -> {float(data[clothe][0])} Vendido->{data[clothe][2]}')
-            #             for clothe in lost]
+                [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])} Vendido->{data[clothe][2]}')
+                    for clothe in lost]
 
-            #         print()             
+                print()             
         elif opt == "3":
+            owner = input("Nombre: ")
+            if owner == "":
+                continue
+
+            with open(f"{path}.db") as db:
+                data = json.load(db)
+                change = False
+                for cl in data:
+                    if data[cl][3] == owner:
+                        change = True
+                        data[cl][5] = False
+
+                with open(f"{path}.db", "w") as d:
+                    json.dump(data, d)
+            if change:
+                print("Ropa entregada correctamente.\n")
+            else:
+                print("Dueño no encontrado en la lista. \n")
+
+        elif opt == "4":
             sure = input("Estas serguro: ")
             
             if sure == "":
@@ -325,9 +380,9 @@ def inventary(path): #falta
             print()
             return
 
-def advanced_search(path):
+def advanced_search(path): #terminar
     while True:
-        typ = input("1 - Busqueda por numero\n2 - Busqueda por nombre\n-> ")
+        typ = input("1 - Busqueda por numero de serie\n2 - Busqueda por nombre\n-> ")
         print()
 
         if typ == "1":
@@ -379,31 +434,42 @@ def make_cut(path):
             with open(f"{path}_names.db", "w") as n:
                 json.dump(names,n)
 
-            print("Corte realizado correctamente.")
+            print(f"Corte {len(names[name][0]) - 1} cerrado")
         
     else:
         print("Cancelado\n")
 
 def temp(name, venta):
     while True:
-        selected = input("\n1 - Añadir Articulos \n2 - Vender Articulos \n3 - Buscar Articulos\n4 - Inventario\n5 - Organizacion de ventas\n6 - Resumen por nombres\nEnter - Cerrar Sesion\n-> ")
+        selected = input("\n1 - Articulos\n2 - Inventario \n3 - Organizacion de venta\n4 - Resumen por nombres\nEnter - Cerrar Sesion\n-> ")
         print()
         
         path = create_path(name,venta)
 
         if selected == "1":
-            add_article(path)
+            opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \n-> ")
+            print()
+            
+            if opt == "1":
+                add_article(path)
+            
+            elif opt == "2":
+                sell_article(path)
 
-        elif selected == "2":
-            sell_article(path)
+            elif opt == '3':
+                change_prices(path)  
 
-        elif selected == '3':
-            advanced_search(path)
+            elif opt == '4':
+                return_article(path)
 
-        elif selected == '4':
-            inventary(path)
+            elif opt == '5':
+                advanced_search(path)
+       
+        
+        elif selected == '2':
+            inventory(path)
 
-        elif selected == '5':
+        elif selected == "3":
             sel = input("1 - Realizar Corte \n2 - Resumen de ventas \n-> ")
             print()
             
@@ -412,7 +478,7 @@ def temp(name, venta):
             elif sel == "2":
                 resume(path)
             
-        elif selected == '6':
+        elif selected == '4': #organizar y terminar
 
             select = input(
                 "3 - Resumen por nombres\n->")
