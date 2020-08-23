@@ -4,14 +4,15 @@ import time
 
 def log(path, *args, **kwargs):
     date = time.asctime(time.localtime())
-
-    kwargs.update(dict(file=path))
+    logfile = open(path,"a")
+    kwargs.update(dict(file=logfile))
     print(
         f"{date}",
         *args,
         **kwargs,
     )
     logfile.flush()
+    logfile.close()
 
 
 def create_path(name, venta):
@@ -132,9 +133,10 @@ def sell_article(path):
                     for clothe in sold:
                         temp = data[clothe]
 
+                        names[temp[3]][0][-1] += 1
+                        names[temp[3]][1][-1] += float(temp[0])
+                        names[temp[3]][2][-1] += float(temp[1]) - float(temp[1])*names[temp[3]][3]/100
                         names[temp[3]][4][-1].append(clothe)
-                        names[temp[3]] = (names[temp[3]][0][-1] + 1, names[temp[3]][1][-1] + float(temp[0]), names[temp[3]][2][-1] + float(
-                            temp[1]) - float(temp[1])*names[temp[3]][3][-1]/100, names[temp[3]][3][-1], names[temp[3]][4][-1])
 
                         data[clothe] = (temp[0], temp[1],
                                         True, temp[3], temp[4], temp[5], True)
