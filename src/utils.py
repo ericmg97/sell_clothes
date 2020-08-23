@@ -161,7 +161,10 @@ def search_article(path, art):
             info = data[art][4]
             name = data[art][3]
             price = float(data[art][0])
-            if data[art][2]:
+
+            if not data[art][5]:
+                return (False, None, f"{art}: {name} - {info} -> {price} (Devuelto)")
+            elif data[art][2]:
                 return (False, data[art], f"{art}: {name} - {info} -> {price} (Vendido)")
             else:
                 return (True, data[art], f"{art}: {name} - {info} -> {price}")
@@ -239,7 +242,7 @@ def create_sales(name):
 
 def temp(name, venta):
     while True:
-        selected = input("\n1 - Añadir Articulos \n2 - Vender Articulos \n3 - Resumen\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\n7 - Resumen de Ventas Personales\nEnter - Cerrar Sesion\n-> ")
+        selected = input("\n1 - Añadir Articulos \n2 - Vender Articulos \n3 - Realizar corte\n4 - Registro de Ventas\n5 - Buscar Articulos\n6 - Inventario\n7 - Resumen de Ventas Personales\nEnter - Cerrar Sesion\n-> ")
         print()
 
         if selected == "1":
@@ -249,7 +252,24 @@ def temp(name, venta):
             sell_article(create_path(name, venta))
 
         elif selected == '3':
-            resume(create_path(name, venta))
+            sure = input("Estas seguro: ")
+            if sure == "":
+                with open(f"./{name}_{venta}_names.db") as nm:
+                    names = json.load(nm)
+
+                    for name in names:
+                        names[name][0].append(0)
+                        names[name][1].append(0)
+                        names[name][2].append(0)
+                        names[name][4].append([])
+
+                    with open(f"./{name}_{venta}_names.db", "w") as n:
+                        json.dump(names,n)
+
+                    print("Corte realizado correctamente.")
+               
+            else:
+                print("Cancelado\n")
 
         elif selected == '4':
             print_log(create_path(name, venta))
