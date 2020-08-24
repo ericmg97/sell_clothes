@@ -12,25 +12,28 @@ class sales:
             
 
             if selected == "1":
-                opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \nEnter - Atras\n-> ")
-                print()
-                
-                if opt == "1":
-                    self.add_article()
-                
-                elif opt == "2":
-                    self.sell_article()
+                while(True):
+                    opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \nEnter - Atras\n-> ")
+                    print()
+                    
+                    if opt == "1":
+                        self.add_article()
+                    
+                    elif opt == "2":
+                        self.sell_article()
 
-                elif opt == '3':
-                    self.change_prices()  
+                    elif opt == '3':
+                        self.change_prices()  
 
-                elif opt == '4':
-                    self.return_article()
+                    elif opt == '4':
+                        self.return_article()
 
-                elif opt == '5':
-                    self.advanced_search()
-        
-            
+                    elif opt == '5':
+                        self.advanced_search()
+                    
+                    else:
+                        break
+
             elif selected == '2':
                 self.inventory()
 
