@@ -539,7 +539,7 @@ class sales:
                                 
                     print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
                                                         "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
-                    print("_"*90)
+                    print("_"*70)
 
                 for name in rep_name.items():
                     total = name[1]
@@ -553,7 +553,7 @@ class sales:
                     print("%-20s%-10s%-10s%-12s%-10s%-10s" %
                         (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
 
-                print("_"*90)
+                print("_"*70)
                 print()
 
         else:     
