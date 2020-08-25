@@ -301,58 +301,57 @@ class sales:
                 print("No existe \n")
                 return
 
-            if data[serial][2]:
-                data[serial][2] = False
-                data[serial][5] = True
-                data[serial][6] = False
+            with open(f"{self.path}_names.db") as nm:
+                names = json.load(nm)
 
-                with open(f"{self.path}_names.db") as nm:
-                    names = json.load(nm)
+                for n in names:
+                    if serial in names[n][4][-1]:
+                        names[n][0][-1] -= 1
+                        names[n][1][-1] -= data[serial][0]
+                        names[n][2][-1] -= data[serial][1]
+                        names[n][4][-1].remove(serial) 
 
-                    for n in names:
-                        if serial in names[n][4][-1]:
-                            names[n][0][-1] -= 1
-                            names[n][1][-1] -= data[serial][0]
-                            names[n][2][-1] -= data[serial][1]
-                            names[n][4][-1].remove(serial) 
-                            break            
+                        data[serial][2] = False
+                        data[serial][5] = True
+                        data[serial][6] = False
 
-                    with open(f"{self.path}_names.db", "w") as nm:
-                        json.dump(names, nm)
-                    
-                with open(f"{self.path}.db", "w") as dw:
-                    json.dump(data, dw)
-
-                with open(f"{self.path}.log") as logfile:
-                    lines = logfile.readlines()
-
-                    for line in range(len(lines)):
-                        if serial in lines[line]:
-                            l_split = lines[line].split()
-
-                            if l_split[-1] == serial and l_split[-2] == "vendidas:":
-                                lines.pop(line)
-
-                            else:
-                                for i in range(len(l_split)):
-                                    if l_split[i] == serial:
-                                        l_split.pop(i)
-                                        break
-                                
-                                li = " ".join(l_split)
-
-                                lines.pop(line)                        
-                                lines.insert(line, f"{li}\n")                  
+                        with open(f"{self.path}_names.db", "w") as nm:
+                            json.dump(names, nm)
                             
-                            with open(f"{self.path}.log", "w") as logfile:
-                                logfile.writelines(lines)
+                        with open(f"{self.path}.db", "w") as dw:
+                            json.dump(data, dw)
 
-                            break
-                
-                print("Articulo devuelto exitosamente. \n")
+                        with open(f"{self.path}.log") as logfile:
+                            lines = logfile.readlines()
 
-            else:
-                print("El articulo no ha sido vendido. \n")
+                            for line in range(len(lines)):
+                                if serial in lines[line]:
+                                    l_split = lines[line].split()
+
+                                    if l_split[-1] == serial and l_split[-2] == "vendidas:":
+                                        lines.pop(line)
+
+                                    else:
+                                        for i in range(len(l_split)):
+                                            if l_split[i] == serial:
+                                                l_split.pop(i)
+                                                break
+                                        
+                                        li = " ".join(l_split)
+
+                                        lines.pop(line)                        
+                                        lines.insert(line, f"{li}\n")                  
+                                    
+                                    with open(f"{self.path}.log", "w") as logfile:
+                                        logfile.writelines(lines)
+
+                                    break
+                        
+                        print("Articulo devuelto exitosamente. \n")
+                        break
+
+                else:
+                    print("El articulo no ha sido vendido en este corte. \n")
 
 
     def resume(self):
