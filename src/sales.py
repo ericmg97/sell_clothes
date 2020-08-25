@@ -9,13 +9,13 @@ class sales:
 
     def __call__(self):
         while True:
-            selected = input("\n1 - Articulos\n2 - Inventario \n3 - Organizacion de venta\n4 - Resumen por nombres\nEnter - Salir\n-> ")
+            selected = input("\n1 - Articulos\n2 - Inventario \n3 - Resumen\nEnter - Salir\n-> ")
             print()
             
 
             if selected == "1":
                 while(True):
-                    opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \nEnter - Atras\n-> ")
+                    opt = input("1 - Añadir \n2 - Vender \n3 - Cambiar Precios \n4 - Devolucion \n5 - Buscar \n6 - Cerrar Corte\nEnter - Atras\n-> ")
                     print()
                     
                     if opt == "1":
@@ -33,6 +33,9 @@ class sales:
                     elif opt == '5':
                         self.advanced_search()
                     
+                    elif opt == '6':
+                        self.make_cut()
+
                     else:
                         break
 
@@ -40,22 +43,62 @@ class sales:
                 self.inventory()
 
             elif selected == "3":
-                sel = input("1 - Realizar Corte \n2 - Resumen de ventas \nEnter - Atras\n-> ")
+                sel = input("1 - Ventas \n2 - Nombres \n3 - Estado\nEnter - Atras\n-> ")
                 print()
                 
                 if sel == "1":
-                    self.make_cut()
-                elif sel == "2":
                     self.resume()
                 
-            elif selected == '4':
-                select = input("Nombre: ")          
-                self.resume_names(select)
+                elif sel == "2":
+                    select = input("Nombre: ")          
+                    self.resume_names(select)
+
+                elif sel == "3":
+                    with open(f"{self.path}.db") as db:
+                        data = json.load(db)
+
+                        with open(f"{self.path}_names.db") as nm:
+                            names = json.load(nm)
+
+                            rep_name = {}
+                            rep_inv = {}
+                            rep_returned = {}
+                            for i, name in enumerate(names.items()):
+                                
+                                rep_inv[name[0]] = 0
+                                rep_returned[name[0]] = 0
+                                rep_name[name[0]] = 0
+
+                                for cl in data.items():
+                                    if name[0] == cl[1][3]:
+                                        rep_name[name[0]] += 1
+                                        if not cl[1][2] and cl[1][5] and cl[1][6]:
+                                            rep_inv[name[0]] += 1
+                                        elif not cl[1][5] and not cl[1][2]:
+                                            rep_returned[name[0]] += 1
+                                        
+                            print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
+                                                                "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
+                            print("_"*70)
+
+                        for name in rep_name.items():
+                            total = name[1]
+                            vendido = 0
+                            for cut in names[name[0]][0]:
+                                vendido += cut
+
+                            inventario = rep_inv[name[0]]
+                            entregado = rep_returned[name[0]]
+
+                            print("%-20s%-10s%-10s%-12s%-10s%-10s" %
+                                (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
+
+                        print("_"*70)
+                        print()
 
             else:
                 break
-
-   
+  
     def add_article(self):
         with open(f"{self.path}.db") as r:
             data = json.load(r)
@@ -482,7 +525,7 @@ class sales:
 
     def inventory(self): 
         while True:
-            opt = input("1 - Realizar Inventario\n2 - Revisar faltantes \n3 - Entregar ropa al dueño\n4 - Borrar Inventario\n-> ")
+            opt = input("1 - Realizar Inventario\n2 - Revisar faltantes \n3 - Entregar ropa al dueño\n4 - Borrar Inventario\nEnter - Atras\n-> ")
             print()
             
             if opt == "1":
@@ -573,87 +616,46 @@ class sales:
     def resume_names(self, name):
         with open(f"{self.path}_names.db") as nm:
             names = json.load(nm)
+                
+            if name not in names:
+                print("Ese nombre no existe.\n")
+                return
+                
+            while(True):
+                sel = input("\nCortes a resumir: \n1 - Todos\n2 - Ultimo\n3 - Seleccion Manual\nEnter - Atras\n-> ")
 
-            if name == "todos":    
-                with open(f"{self.path}.db") as db:
-                    data = json.load(db)
-
-                    rep_name = {}
-                    rep_inv = {}
-                    rep_returned = {}
-                    for i, name in enumerate(names.items()):
-                        
-                        rep_inv[name[0]] = 0
-                        rep_returned[name[0]] = 0
-                        rep_name[name[0]] = 0
-
-                        for cl in data.items():
-                            if name[0] == cl[1][3]:
-                                rep_name[name[0]] += 1
-                                if not cl[1][2] and cl[1][5] and cl[1][6]:
-                                    rep_inv[name[0]] += 1
-                                elif not cl[1][5] and not cl[1][2]:
-                                    rep_returned[name[0]] += 1
-                                
-                    print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
-                                                        "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
-                    print("_"*70)
-
-                for name in rep_name.items():
-                    total = name[1]
-                    vendido = 0
-                    for cut in names[name[0]][0]:
-                        vendido += cut
-
-                    inventario = rep_inv[name[0]]
-                    entregado = rep_returned[name[0]]
-
-                    print("%-20s%-10s%-10s%-12s%-10s%-10s" %
-                        (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
-
-                print("_"*70)
-                print()
-
-            else:     
-                if name not in names:
-                    print("Ese nombre no existe.\n")
+                if sel == "":
+                    print()
                     return
-                    
-                while(True):
-                    sel = input("\nCortes a resumir: \n1 - Todos\n2 - Ultimo\n3 - Seleccion Manual\n-> ")
+                elif sel == "1":
+                    with open("./users.db") as us:
+                        users = json.load(us)
+                        cuts = [i for i in range(0, users[self.name][self.sale])]
+                        
+                        print("\nPrendas Vendidas: ")
+                        self.check_sold(name, cuts)        
 
-                    if sel == "":
-                        print()
-                        return
-                    elif sel == "1":
-                        with open("./users.db") as us:
-                            users = json.load(us)
-                            cuts = [i for i in range(0, users[self.name][self.sale])]
-                            
-                            print("\nPrendas Vendidas: ")
-                            self.check_sold(name, cuts)        
+                        print("\nPrendas En Inventario: ")
+                        self.check_inventory(name)
 
-                            print("\nPrendas En Inventario: ")
-                            self.check_inventory(name)
+                        print("\nPrendas Devueltas:")
+                        self.check_returned_to_owners(name)
 
-                            print("\nPrendas Devueltas:")
-                            self.check_returned_to_owners(name)
+                elif sel == "2":
+                    with open("./users.db") as us:
+                        users = json.load(us)
+                        cuts = [users[self.name][self.sale] - 1]
 
-                    elif sel == "2":
-                        with open("./users.db") as us:
-                            users = json.load(us)
-                            cuts = [users[self.name][self.sale] - 1]
+                        print("\nPrendas Vendidas: ")
+                        self.check_sold(name, cuts)  
 
-                            print("\nPrendas Vendidas: ")
-                            self.check_sold(name, cuts)  
-
-                    elif sel == "3":
-                        cut = input("\nCortes: ")
-                        try:
-                            cuts = {int(x) - 1 for x in cut.split()}             
-                            
-                            print("\nPrendas Vendidas: ")
-                            self.check_sold(name, cuts)  
-                        except:
-                            print("Entrada Invalida\n")
-                            continue
+                elif sel == "3":
+                    cut = input("\nCortes: ")
+                    try:
+                        cuts = {int(x) - 1 for x in cut.split()}             
+                        
+                        print("\nPrendas Vendidas: ")
+                        self.check_sold(name, cuts)  
+                    except:
+                        print("Entrada Invalida\n")
+                        continue
