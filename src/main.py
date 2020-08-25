@@ -1,5 +1,4 @@
 from accounts import login, create_account
-import os.path
 
 if __name__ == "__main__":
     while True:

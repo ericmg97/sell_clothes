@@ -188,9 +188,12 @@ class sales:
                     prices = input("Nuevos Precios (Venta Costo): ").split()
                     
                     try:
-                        if len(prices) == 2:
-                            data[art][0] = float(prices[0])
-                            data[art][1] = float(prices[1])
+                        if len(prices) == 2 and prices[0] >= prices[1]:
+                                data[art][0] = float(prices[0])
+                                data[art][1] = float(prices[1])
+                        elif prices[0] < prices[1]:
+                            print("El precio de venta debe ser mayor o igual al precio de costo\nCancelado\n")
+                            continue
                         else:
                             data[art][0] = float(prices[0])
                             data[art][1] = float(prices[0])
@@ -287,7 +290,7 @@ class sales:
             else:
                 print("Cancelado\n")
 
-    def return_article(self): #terminar
+    def return_article(self):
         serial = input("Numero de serie: ")
         print()
 
@@ -352,7 +355,6 @@ class sales:
 
                 else:
                     print("El articulo no ha sido vendido en este corte. \n")
-
 
     def resume(self):
         while(True):
@@ -774,6 +776,9 @@ class sales:
 
                         print("\nPrendas En Inventario: ")
                         self.check_inventory(name)
+
+                        print("\nPrendas Faltantes: ")
+                        self.check_lost(name)
 
                         print("\nPrendas Devueltas:")
                         self.check_returned_to_owners(name)
