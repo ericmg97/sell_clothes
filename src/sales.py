@@ -234,6 +234,8 @@ class sales:
                 if art[0]:
                     price = float(art[1][0])
                     tot_price += price
+                else:
+                    sold.remove(clothe)
 
                 print(art[2])
 
@@ -374,7 +376,7 @@ class sales:
                         with open(f"{self.path}.db", "w") as d:
                             json.dump(data, d)
 
-                    print("Prendas añadidas correctamente. \ns")
+                    print("Prendas añadidas correctamente. \n")
                 else:
                     print("Cancelado.\n")
                     continue
@@ -492,18 +494,26 @@ class sales:
 
         with open(f"{self.path}.db") as db:
             data = json.load(db)
-            change = False
-            for cl in data:
+            own = False
+            
+            print("\nPrendas Entregadas: \n")
+            
+            for cl in data:            
                 if data[cl][3] == owner:
-                    change = True
-                    data[cl][5] = False
+                    own = True
+                    
+                    if data[cl][6] and not data[cl][2] and data[cl][5]:
+                        print(self.search_article(cl)[2])
+                        
+                        data[cl][5] = False
 
             with open(f"{self.path}.db", "w") as d:
                 json.dump(data, d)
-        if change:
-            print("Ropa entregada correctamente.\n")
-        else:
-            print("Dueño no encontrado en la lista. \n")
+        
+        if not own: 
+            print("\nDueño no encontrado. ")
+        
+        print()
 
     def delete_inventory(self):
         sure = input("Estas serguro: ")
@@ -532,10 +542,17 @@ class sales:
                 self.add_to_inventory()
             
             elif opt == "2":        
-                name = input("Nombre: ")
-
-                self.check_lost(name)
-
+                name = input("1 - Todos\n2 - Por Nombre\nEnter - Atras->")
+                if name == "1":
+                    self.check_lost("todos")
+                
+                elif name == "2":
+                    nm = input("Nombre: ")
+                    self.check_lost(nm)
+               
+                else:
+                    continue
+                
             elif opt == "3":
                 self.return_clothe_to_owner()
 
@@ -651,7 +668,7 @@ class sales:
                     with open(f"{self.path}_names.db", "w") as n:
                         json.dump(names,n)
 
-                    print(f"Corte {users[self.name][self.sale] - 1} cerrado")
+                    print(f"Corte {users[self.name][self.sale] - 1} cerrado\n")
             
         else:
             print("Cancelado\n")
