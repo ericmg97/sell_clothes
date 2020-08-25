@@ -665,8 +665,8 @@ class sales:
 
                     users[self.name][self.sale] += 1
 
-                    with open(f"{self.path}_names.db", "w") as n:
-                        json.dump(names,n)
+                    with open(f"users.db", "w") as us:
+                        json.dump(users,us)
 
                     print(f"Corte {users[self.name][self.sale] - 1} cerrado\n")
             
