@@ -339,20 +339,17 @@ class sales:
                                         l_split.pop(i)
                                         break
                                 
-                                li = " "
-                                li.join(l_split)
+                                li = " ".join(l_split)
 
-                                lines.pop(line)
-
-                                try:
-                                    lines.insert(line - 1, li)
-                                except:
-                                    lines.inesrt(0, li)
+                                lines.pop(line)                        
+                                lines.insert(line, f"{li}\n")                  
                             
                             with open(f"{self.path}.log", "w") as logfile:
                                 logfile.writelines(lines)
 
                             break
+                
+                print("Articulo devuelto exitosamente. \n")
 
             else:
                 print("El articulo no ha sido vendido. \n")
