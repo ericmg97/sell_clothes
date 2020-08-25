@@ -339,7 +339,9 @@ class sales:
                                         l_split.pop(i)
                                         break
                                 
-                                li = l_split.join()
+                                li = " "
+                                li.join(l_split)
+
                                 lines.pop(line)
 
                                 try:
