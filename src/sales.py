@@ -180,11 +180,12 @@ class sales:
 
             cl = self.search_article(art)
 
+            self.info_articles([art])
+
             with open(f"{self.path}.db") as r:
                 data = json.load(r)
 
                 if cl[0]:
-                    print(f"{cl[2]} {data[art][1]}")
                     prices = input("Nuevos Precios (Venta Costo): ").split()
                     
                     try:
@@ -207,7 +208,6 @@ class sales:
                         print("Los datos introducidos son incorrectos. Cancelado\n")
                         pass
                 else:
-                    print(cl[2])
                     print("No se pueden modificar sus precios\n")
 
     def add_name(self, name):
@@ -244,6 +244,8 @@ class sales:
             tot_price = 0
             sold = clothes[:]
 
+            self.info_articles(clothes)
+
             for clothe in clothes:
                 art = self.search_article(clothe)
 
@@ -252,8 +254,6 @@ class sales:
                     tot_price += price
                 else:
                     sold.remove(clothe)
-
-                print(art[2])
 
             print(f"\nPrecio Total: {tot_price}\n")
 
@@ -289,6 +289,30 @@ class sales:
                             json.dump(names, nm)
             else:
                 print("Cancelado\n")
+    
+    def info_articles(self, arts):
+        print("\n%-7s%-20s%-45s%-10s%-10s%-10s" % ("No", "Dueño",
+                                                            "Informacion", "Venta", "Costo", "Estado"))
+        print("_"*100)
+
+        inv = []
+        for art in arts:
+            cl = self.search_article(art)
+
+            if cl[1] is not None:
+                print("%-7s%-20s%-45s%-10s%-10s%-10s" %
+                    (art, cl[1][3], cl[1][4], cl[1][0], cl[1][1], cl[2]))
+
+            else:
+                inv.append(cl[2])
+        
+        print("_"*100)
+        print()
+        
+        for i in inv:
+            print(i)
+
+        print()
 
     def return_article(self):
         serial = input("Numero de serie: ")
@@ -430,19 +454,21 @@ class sales:
 
     def add_to_inventory(self):
         while True:
-            ad = input("Añadir prenda: ")
+            ad = input("Añadir prendas: ")
             if ad == "":
                 print()
                 break
             else:
                 list_art = ad.split()
                 ad_art = []
+
+                self.info_articles(list_art)
+
                 for art in list_art:
                     search = self.search_article(art)
                     if search[0]:
                         ad_art.append(art)
-                        
-                    print(search[2])
+               
                 
                 sure = input("Seguro: ")
                 if sure == "":
@@ -478,10 +504,9 @@ class sales:
                 except:
                     pass
 
-            [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])}')
-                for clothe in lost]
+            self.info_articles(lost)
 
-            print(f"\nTotal: {len(lost)}")
+            print(f"Total: {len(lost)}")
 
             print()  
 
@@ -498,10 +523,9 @@ class sales:
             except:
                 pass
 
-            [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])}')
-                for clothe in inven]
+            self.info_articles(inven)
 
-            print(f"\nTotal: {len(inven)}")
+            print(f"Total: {len(inven)}")
 
             print()  
 
@@ -542,10 +566,9 @@ class sales:
             except:
                 pass
 
-            [print(f'{clothe}: {data[clothe][3]} - {data[clothe][4]} -> {float(data[clothe][0])}')
-                for clothe in inven]
+            self.info_articles(inven)
 
-            print(f"\nTotal: {len(inven)}")
+            print(f"Total: {len(inven)}")
 
             print() 
 
@@ -576,15 +599,17 @@ class sales:
             own = False
             
             print("\nPrendas Entregadas: \n")
-            
+            info = []
             for cl in data:            
                 if data[cl][3] == owner:
                     own = True
                     
                     if data[cl][6] and not data[cl][2] and data[cl][5]:
-                        print(self.search_article(cl)[2])
-                        
+                        info.append(cl)               
                         data[cl][5] = False
+            
+            if len(info):
+                self.info_articles(info)
 
             with open(f"{self.path}.db", "w") as d:
                 json.dump(data, d)
@@ -650,12 +675,9 @@ class sales:
             if typ == "1":
                 search = input("Prendas a Localizar: ")
                 search = search.split()
-
-                for clothe in search:
-                    print(self.search_article(clothe)[2])
-
-                print()
-            
+                
+                self.info_articles(search)
+                
             elif typ == "2":
                 inp = input("Descripcion: ")
                 self.search_description(inp)    
@@ -687,22 +709,13 @@ class sales:
 
         with open(f"{self.path}.db") as db:
             data = json.load(db)
-            
+            clothes = []
             for cl in data.items():
-                if desc in cl[1][4] and name in cl[1][3]:
-                    info = cl[1][4]
-                    name = cl[1][3]
-                    price = float(cl[1][0])
-                    
-                    if not cl[1][5]:
-                        print(f"{cl[0]}: {name} - {info} -> {price} (Devuelto)")
-                    elif cl[1][2]:
-                        print(f"{cl[0]}: {name} - {info} -> {price} (Vendido)")
-                    elif cl[1][6]:
-                        print(f"{cl[0]}: {name} - {info} -> {price} (En inventario)")
-                    else:
-                        print(f"{cl[0]}: {name} - {info} -> {price}")
-                                           
+                if desc in cl[1][4] and name in cl[1][3]:      
+                    clothes.append(cl[0])
+
+            self.info_articles(clothes)
+
     def search_article(self, art):
         with open(f"{self.path}.db") as db:
             data = json.load(db)
@@ -713,13 +726,13 @@ class sales:
                 price = float(data[art][0])
 
                 if not data[art][5]:
-                    return (False, data[art][:], f"{art}: {name} - {info} -> {price} (Devuelto)")
+                    return (False, data[art][:], "Devuelto")
                 elif data[art][2]:
-                    return (False, data[art][:], f"{art}: {name} - {info} -> {price} (Vendido)")
+                    return (False, data[art][:], "Vendido")
                 elif data[art][6]:
-                    return (True, data[art][:], f"{art}: {name} - {info} -> {price} (En inventario)")
+                    return (True, data[art][:], "En inventario")
                 else:
-                    return (True, data[art][:], f"{art}: {name} - {info} -> {price}")
+                    return (True, data[art][:], "Ok")
 
             except:
                 return (False, None, f"{art}: No existe")
