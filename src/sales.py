@@ -546,9 +546,9 @@ class sales:
                 print()
                 return
 
-    def advanced_search(self): #terminar
+    def advanced_search(self): 
         while True:
-            typ = input("1 - Busqueda por numero de serie\n2 - Busqueda por nombre\n-> ")
+            typ = input("1 - Busqueda por numero de serie\n2 - Busqueda por descripcion\n3 - Busqueda por nombre\nEnter - Atras\n-> ")
             print()
 
             if typ == "1":
@@ -559,11 +559,54 @@ class sales:
                     print(self.search_article(clothe)[2])
 
                 print()
+            
             elif typ == "2":
-                pass #implementar busqueda por nombre
+                inp = input("Descripcion: ")
+                self.search_description(inp)    
+                print()
+
+            elif typ == "3":
+                name = input("Nombre: ")
+
+                if name == "":
+                    continue
+
+                with open(f"{self.path}_names.db") as nm:
+                    names = json.load(nm)
+                
+                    desc = input("Descripcion: ")
+                    print()
+                    
+                    self.search_description(desc,name)   
+
+                    print()
+
             else:
                 return
 
+    def search_description(self, desc, name = ""):
+        if desc == "":
+            return
+            print()
+
+        with open(f"{self.path}.db") as db:
+            data = json.load(db)
+            
+            for cl in data.items():
+                if desc in cl[1][4] and name in cl[1][3]:
+                    info = cl[1][4]
+                    name = cl[1][3]
+                    price = float(cl[1][0])
+                    
+                    if not cl[1][5]:
+                        print(f"{cl[0]}: {name} - {info} -> {price} (Devuelto)")
+                    elif cl[1][2]:
+                        print(f"{cl[0]}: {name} - {info} -> {price} (Vendido)")
+                    elif cl[1][6]:
+                        print(f"{cl[0]}: {name} - {info} -> {price} (En inventario)")
+                    else:
+                        print(f"{cl[0]}: {name} - {info} -> {price}")
+                                           
     def search_article(self, art):
         with open(f"{self.path}.db") as db:
             data = json.load(db)
