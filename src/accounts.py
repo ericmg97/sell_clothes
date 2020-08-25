@@ -55,12 +55,12 @@ def create_sales(name):
                 print("Nombre no valido, intente con uno diferente")
                 continue
             elif name not in users:
-                users[name] = [venta]
+                users[name] = {venta: 1}
             elif venta in users[name]:
                 print("Nombre existente, intente con uno diferente")
                 continue
             else:
-                users[name].append(venta)
+                users[name][venta] = 1
 
             path = create_path(name,venta)
 
@@ -86,7 +86,16 @@ def login_sales(users, name):
             print()
             break
         elif venta in users[name]:
-            actual_sales = sales(create_path(name, venta))
+            actual_sales = sales(name, venta)
+
+            with open("./users.db") as us:
+                users = json.load(us)
+                print()
+                print("_"*18)
+                print(f"\n     CORTE {users[name][venta]}")
+                print("_"*18)
+                print()
+
             actual_sales()
         else:
             print("Nombre de venta inexistente \n")

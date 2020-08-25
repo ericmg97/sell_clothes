@@ -2,8 +2,10 @@ import json
 from utils import *
 
 class sales:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, name, sale):
+        self.name = name
+        self.sale = sale
+        self.path = create_path(name, sale)
 
     def __call__(self):
         while True:
@@ -230,56 +232,86 @@ class sales:
     def return_article(self): #terminar
         pass
 
-    def resume(self): #mejorar
+    def resume(self):
         while(True):
-            sel = input("Cortes a resumir: ")
+            sel = input("Cortes a resumir: \n1 - Todos\n2 - Ultimo\n3 - Seleccion Manual\n-> ")
+
             if sel == "":
                 print()
                 return
+            elif sel == "1":
+                with open("./users.db") as us:
+                    users = json.load(us)
 
-            try:
-                cuts = {int(x) - 1 for x in sel.split()}
-            except:
-                print("Cortes inexistentes\n")
-                continue
+                    cuts = [i for i in range(0, users[self.name][self.sale])]
+                    self.__resume__(cuts)
 
-            with open(f"{self.path}.db") as db:
-                with open(f"{self.path}_names.db") as nm:
-                    names = json.load(nm)
-                    data = json.load(db)
-                        
-                    total = 0
-                    cant = 0
-                    total_gan = 0
-                    total_dar = 0
-                    sold_out = []
+            elif sel == "2":
+                with open("./users.db") as us:
+                    users = json.load(us)
 
-                    print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres", "Cantidad",
-                                                                "Total", "Entregar", "Ganancia", "Prendas Vendidas"))
-                    print("_"*80)
+                    cuts = [users[self.name][self.sale] - 1]
+                    self.__resume__(cuts)
 
-                    for name in names.items():
-                        total_name = [0,0,0,0,[]]
+            elif sel == "3":
+                cut = input("\nCortes: ")
+                try:
+                    cuts = {int(x) - 1 for x in cut.split()}             
+                    self.__resume__(cuts)
+                except:
+                    print("Entrada Invalida\n")
+                    continue
 
-                        for cut in cuts:
-                            cant += name[1][0][cut]
-                            total += name[1][1][cut]
-                            total_gan += name[1][1][cut] - name[1][2][cut]
-                            total_dar += name[1][2][cut]
-                            sold_out.extend(name[1][4][cut])
+    def __resume__(self, cuts):
+        with open(f"{self.path}.db") as db:
+            with open(f"{self.path}_names.db") as nm:
+                names = json.load(nm)
+                data = json.load(db)
+                    
+                total = 0
+                cant = 0
+                total_gan = 0
+                total_dar = 0
+                sold_out = []
 
-                            total_name[0] += name[1][0][cut]
-                            total_name[1] += name[1][1][cut]
-                            total_name[2] += name[1][2][cut]
-                            total_name[4].extend(name[1][4][cut])
+                with open("./users.db") as us:
+                    users = json.load(us)
+                    stop = False
+                    for cut in cuts:
+                        if cut < 0 or cut >= users[self.name][self.sale]:
+                            stop = True
+                            print(f"Corte {cut + 1} inexistente") 
+                    
+                    if stop:
+                        print()
+                        return
 
-                        print("%-20s%-10s%-10s%-10s%-10s" %
-                            (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]), *total_name[4])
+                print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres", "Cantidad",
+                                                            "Total", "Entregar", "Ganancia", "Prendas Vendidas"))
+                print("_"*80)
 
-                    print("_"*80)
+                for name in names.items():
+                    total_name = [0,0,0,0,[]]
+                    
+                    for cut in cuts:
+                        cant += name[1][0][cut]
+                        total += name[1][1][cut]
+                        total_gan += name[1][1][cut] - name[1][2][cut]
+                        total_dar += name[1][2][cut]
+                        sold_out.extend(name[1][4][cut])
+
+                        total_name[0] += name[1][0][cut]
+                        total_name[1] += name[1][1][cut]
+                        total_name[2] += name[1][2][cut]
+                        total_name[4].extend(name[1][4][cut])
+
                     print("%-20s%-10s%-10s%-10s%-10s" %
-                        ("General", cant, total, total_dar, total_gan), *sold_out)
-                    print()
+                        (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]), *total_name[4])
+
+                print("_"*80)
+                print("%-20s%-10s%-10s%-10s%-10s" %
+                    ("General", cant, total, total_dar, total_gan), *sold_out)
+                print()
 
     def add_to_inventory(self):
         while True:
@@ -510,7 +542,15 @@ class sales:
                 with open(f"{self.path}_names.db", "w") as n:
                     json.dump(names,n)
 
-                print(f"Corte {len(names[name][0]) - 1} cerrado")
+                with open("users.db") as u:
+                    users = json.load(u)
+
+                    users[self.name][self.sale] += 1
+
+                    with open(f"{self.path}_names.db", "w") as n:
+                        json.dump(names,n)
+
+                    print(f"Corte {users[self.name][self.sale] - 1} cerrado")
             
         else:
             print("Cancelado\n")
