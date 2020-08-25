@@ -87,15 +87,7 @@ def login_sales(users, name):
             break
         elif venta in users[name]:
             actual_sales = sales(name, venta)
-
-            with open("./users.db") as us:
-                users = json.load(us)
-                print()
-                print("_"*18)
-                print(f"\n     CORTE {users[name][venta]}")
-                print("_"*18)
-                print()
-
+            
             actual_sales()
         else:
             print("Nombre de venta inexistente \n")

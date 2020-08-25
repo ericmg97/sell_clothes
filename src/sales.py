@@ -9,6 +9,15 @@ class sales:
 
     def __call__(self):
         while True:
+            with open("./users.db") as us:
+                users = json.load(us)
+                print()
+                print("_"*18)
+                print(f"\n     CORTE {users[self.name][self.sale]}")
+                print("_"*18)
+                print()
+
+
             selected = input("\n1 - Articulos\n2 - Inventario \n3 - Resumen\nEnter - Salir\n-> ")
             print()
             
@@ -35,6 +44,7 @@ class sales:
                     
                     elif opt == '6':
                         self.make_cut()
+                        break
 
                     else:
                         break
