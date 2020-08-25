@@ -68,7 +68,7 @@ def create_sales(name):
                 json.dump({}, db)
 
             with open(f"{path}.log", "w") as log:
-                json.dump({}, log)
+                pass
 
             with open(f"{path}_names.db", "w") as names:
                 json.dump({}, names)
@@ -87,7 +87,7 @@ def login_sales(users, name):
             break
         elif venta in users[name]:
             actual_sales = sales(name, venta)
-            
+
             actual_sales()
         else:
             print("Nombre de venta inexistente \n")

@@ -149,9 +149,12 @@ class sales:
                             continue
 
                         try:
-                            if len(prices) == 2:
+                            if len(prices) == 2 and prices[0] >= prices[1]:
                                 data[curr_art] = (float(prices[0]), float(
                                     prices[1]), False, name, info, True, False)
+                            elif prices[0] < prices[1]:
+                                print("El precio de venta debe ser mayor o igual al precio de costo\nCancelado\n")
+                                continue
                             else:
                                 data[curr_art] = (float(prices[0]), float(
                                     prices[0]), False, name, info, True, False)
@@ -285,7 +288,73 @@ class sales:
                 print("Cancelado\n")
 
     def return_article(self): #terminar
-        pass
+        serial = input("Numero de serie: ")
+        print()
+
+        with open(f"{self.path}.db") as db: 
+            data = json.load(db)
+            
+            if serial == "":
+                return
+
+            elif serial not in data:
+                print("No existe \n")
+                return
+
+            if data[serial][2]:
+                data[serial][2] = False
+                data[serial][5] = True
+                data[serial][6] = False
+
+                with open(f"{self.path}_names.db") as nm:
+                    names = json.load(nm)
+
+                    for n in names:
+                        if serial in names[n][4][-1]:
+                            names[n][0][-1] -= 1
+                            names[n][1][-1] -= data[serial][0]
+                            names[n][2][-1] -= data[serial][1]
+                            names[n][4][-1].remove(serial) 
+                            break            
+
+                    with open(f"{self.path}_names.db", "w") as nm:
+                        json.dump(names, nm)
+                    
+                with open(f"{self.path}.db", "w") as dw:
+                    json.dump(data, dw)
+
+                with open(f"{self.path}.log") as logfile:
+                    lines = logfile.readlines()
+
+                    for line in range(len(lines)):
+                        if serial in lines[line]:
+                            l_split = lines[line].split()
+
+                            if l_split[-1] == serial and l_split[-2] == "vendidas:":
+                                lines.pop(line)
+
+                            else:
+                                for i in range(len(l_split)):
+                                    if l_split[i] == serial:
+                                        l_split.pop(i)
+                                        break
+                                
+                                li = l_split.join()
+                                lines.pop(line)
+
+                                try:
+                                    lines.insert(line - 1, li)
+                                except:
+                                    lines.inesrt(0, li)
+                            
+                            with open(f"{self.path}.log", "w") as logfile:
+                                logfile.writelines(lines)
+
+                            break
+
+            else:
+                print("El articulo no ha sido vendido. \n")
+
 
     def resume(self):
         while(True):
