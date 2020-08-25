@@ -542,12 +542,12 @@ class sales:
                 self.add_to_inventory()
             
             elif opt == "2":        
-                name = input("1 - Todos\n2 - Por Nombre\nEnter - Atras->")
+                name = input("1 - Todos\n2 - Por Nombre\nEnter - Atras\n->")
                 if name == "1":
                     self.check_lost("todos")
                 
                 elif name == "2":
-                    nm = input("Nombre: ")
+                    nm = input("\nNombre: ")
                     self.check_lost(nm)
                
                 else:
