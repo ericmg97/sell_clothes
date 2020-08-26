@@ -87,46 +87,41 @@ class sales:
                         self.resume_names(select)
 
                     elif sel == "3":
-                        with open(f"{self.path}.db") as db:
-                            data = json.load(db)
+                        with open(f"{self.path}_names.db") as nm:
+                            names = json.load(nm)
 
-                            with open(f"{self.path}_names.db") as nm:
-                                names = json.load(nm)
-
-                                rep_name = {}
-                                rep_inv = {}
-                                rep_returned = {}
-                                for i, name in enumerate(names.items()):
-                                    
-                                    rep_inv[name[0]] = 0
-                                    rep_returned[name[0]] = 0
-                                    rep_name[name[0]] = 0
-
-                                    for cl in data.items():
-                                        if name[0] == cl[1][3]:
-                                            rep_name[name[0]] += 1
-                                            if not cl[1][2] and cl[1][5] and cl[1][6]:
-                                                rep_inv[name[0]] += 1
-                                            elif not cl[1][5] and not cl[1][2]:
-                                                rep_returned[name[0]] += 1
-                                            
+                            with open("./users.db") as us:
+                                users = json.load(us)
+                                cuts = [i for i in range(0, users[self.name][self.sale])]
+                                
+                                
+                                        
                                 print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
                                                                     "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
                                 print("_"*70)
+                                tot_v = tot_i = tot_e = tot_f = tot_t = 0
+                               
 
-                            for name in rep_name.items():
-                                total = name[1]
-                                vendido = 0
-                                for cut in names[name[0]][0]:
-                                    vendido += cut
+                                for name in names.items():
+                                    vendido = len(self.check_sold(name[0],cuts, True))
+                                    tot_v += vendido
+                                    inventario = len(self.check_inventory(name[0]))
+                                    tot_t += inventario
+                                    entregado = len(self.check_returned_to_owners(name[0]))
+                                    tot_e += entregado
+                                    faltante = len(self.check_lost(name[0]))
+                                    tot_f += faltante
+                                    total = vendido + inventario + entregado + faltante
+                                    tot_t += total
 
-                                inventario = rep_inv[name[0]]
-                                entregado = rep_returned[name[0]]
+                                    print("%-20s%-10s%-10s%-12s%-10s%-10s" %
+                                        (name[0], total, vendido, inventario, entregado, faltante))
+                                
 
-                                print("%-20s%-10s%-10s%-12s%-10s%-10s" %
-                                    (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
-
-                            print("_"*70)
+                                print("_"*70)
+                                print("%-20s%-10s%-10s%-12s%-10s%-10s" % ("Total",
+                                                                    tot_t, tot_v, tot_i, tot_e, tot_f))
+                            
                             print()
 
             else:
@@ -444,6 +439,11 @@ class sales:
                 cut = input("\nCortes: ")
                 try:
                     cuts = {int(x) - 1 for x in cut.split()} 
+                    
+                    if not self.check_cuts(cuts):
+                        print("Entrada Invalida\n")
+                        continue
+                    
                     break            
                 except:
                     print("Entrada Invalida\n")
@@ -462,9 +462,6 @@ class sales:
                 total_gan = 0
                 total_dar = 0
                 sold_out = []
-
-                if not self.check_cuts(cuts):
-                    return
 
                 print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres", "Cantidad",
                                                             "Total", "Entregar", "Ganancia", "Prendas Vendidas"))
