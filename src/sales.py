@@ -153,13 +153,14 @@ class sales:
                             continue
 
                         try:
-                            if len(prices) == 2 and prices[0] >= prices[1]:
-                                data[curr_art] = (float(prices[0]), float(
-                                    prices[1]), False, name, info, True, False)
-                            elif prices[0] < prices[1]:
-                                print("El precio de venta debe ser mayor o igual al precio de costo\nCancelado\n")
-                                continue
-                            else:
+                            if len(prices) == 2:
+                                if float(prices[0]) >= float(prices[1]):
+                                    data[curr_art] = (float(prices[0]), float(
+                                        prices[1]), False, name, info, True, False)
+                                else:
+                                    print("El precio de venta debe ser mayor o igual al precio de costo\nCancelado\n")
+                                    continue
+                            elif len(prices) == 1:
                                 data[curr_art] = (float(prices[0]), float(
                                     prices[0]), False, name, info, True, False)
 
@@ -193,13 +194,14 @@ class sales:
                     prices = input("Nuevos Precios (Venta Costo): ").split()
                     
                     try:
-                        if len(prices) == 2 and prices[0] >= prices[1]:
+                        if len(prices) == 2:
+                            if float(prices[0]) >= float(prices[1]):
                                 data[art][0] = float(prices[0])
                                 data[art][1] = float(prices[1])
-                        elif prices[0] < prices[1]:
-                            print("El precio de venta debe ser mayor o igual al precio de costo\nCancelado\n")
-                            continue
-                        else:
+                            else:
+                                print("El precio de venta debe ser mayor o igual al precio de costo\nCancelado\n")
+                                continue
+                        elif len(prices) == 1:
                             data[art][0] = float(prices[0])
                             data[art][1] = float(prices[0])
 
