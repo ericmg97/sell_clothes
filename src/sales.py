@@ -53,58 +53,62 @@ class sales:
                 self.inventory()
 
             elif selected == "3":
-                sel = input("1 - Ventas \n2 - Nombres \n3 - Estado\nEnter - Atras\n-> ")
-                print()
-                
-                if sel == "1":
-                    self.resume()
-                
-                elif sel == "2":
-                    select = input("Nombre: ")          
-                    self.resume_names(select)
+                while True:
+                    sel = input("1 - Ventas \n2 - Nombres \n3 - Estado\nEnter - Atras\n-> ")
+                    print()
+                    
+                    if sel == '':
+                        break
 
-                elif sel == "3":
-                    with open(f"{self.path}.db") as db:
-                        data = json.load(db)
+                    if sel == "1":
+                        self.resume()
+                    
+                    elif sel == "2":
+                        select = input("Nombre: ")          
+                        self.resume_names(select)
 
-                        with open(f"{self.path}_names.db") as nm:
-                            names = json.load(nm)
+                    elif sel == "3":
+                        with open(f"{self.path}.db") as db:
+                            data = json.load(db)
 
-                            rep_name = {}
-                            rep_inv = {}
-                            rep_returned = {}
-                            for i, name in enumerate(names.items()):
-                                
-                                rep_inv[name[0]] = 0
-                                rep_returned[name[0]] = 0
-                                rep_name[name[0]] = 0
+                            with open(f"{self.path}_names.db") as nm:
+                                names = json.load(nm)
 
-                                for cl in data.items():
-                                    if name[0] == cl[1][3]:
-                                        rep_name[name[0]] += 1
-                                        if not cl[1][2] and cl[1][5] and cl[1][6]:
-                                            rep_inv[name[0]] += 1
-                                        elif not cl[1][5] and not cl[1][2]:
-                                            rep_returned[name[0]] += 1
-                                        
-                            print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
-                                                                "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
+                                rep_name = {}
+                                rep_inv = {}
+                                rep_returned = {}
+                                for i, name in enumerate(names.items()):
+                                    
+                                    rep_inv[name[0]] = 0
+                                    rep_returned[name[0]] = 0
+                                    rep_name[name[0]] = 0
+
+                                    for cl in data.items():
+                                        if name[0] == cl[1][3]:
+                                            rep_name[name[0]] += 1
+                                            if not cl[1][2] and cl[1][5] and cl[1][6]:
+                                                rep_inv[name[0]] += 1
+                                            elif not cl[1][5] and not cl[1][2]:
+                                                rep_returned[name[0]] += 1
+                                            
+                                print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
+                                                                    "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
+                                print("_"*70)
+
+                            for name in rep_name.items():
+                                total = name[1]
+                                vendido = 0
+                                for cut in names[name[0]][0]:
+                                    vendido += cut
+
+                                inventario = rep_inv[name[0]]
+                                entregado = rep_returned[name[0]]
+
+                                print("%-20s%-10s%-10s%-12s%-10s%-10s" %
+                                    (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
+
                             print("_"*70)
-
-                        for name in rep_name.items():
-                            total = name[1]
-                            vendido = 0
-                            for cut in names[name[0]][0]:
-                                vendido += cut
-
-                            inventario = rep_inv[name[0]]
-                            entregado = rep_returned[name[0]]
-
-                            print("%-20s%-10s%-10s%-12s%-10s%-10s" %
-                                (name[0], total, vendido, inventario, entregado, total - vendido - inventario - entregado))
-
-                        print("_"*70)
-                        print()
+                            print()
 
             else:
                 break
