@@ -61,7 +61,26 @@ class sales:
                         break
 
                     if sel == "1":
-                        self.resume()
+                        cuts = self.select_cuts()
+                        print()
+
+                        if len(cuts):
+                            while True:
+                                inp = input("1 - General\n2 - Personales\nEnter - Atras\n-> ")
+
+                                if inp == "":
+                                    print()
+                                    break
+                                elif inp == "1":
+                                    self.resume_sales(cuts)
+                                elif inp == "2":
+                                    nm = input("\nNombre: ")
+                                    if nm == "":
+                                        print("Cancelado.\n")
+                                    else:
+                                        self.check_sold(nm, cuts)
+
+                            continue                          
                     
                     elif sel == "2":
                         select = input("Nombre: ")          
@@ -228,13 +247,26 @@ class sales:
                     elif int(gain) < 0 or int(gain) > 100:
                         print("Porciento incorrecto")
                         continue
+                    
+                    with open(f"users.db") as us:
+                        users = json.load(us)
+                        
+                        act_cut = users[self.name][self.sale]
 
-                    names[name] = ([0], [0], [0], int(gain), [[]])
-                    with open(f"{self.path}_names.db", "w") as nm:
-                        json.dump(names, nm)
+                        names[name] = ([0], [0], [0], int(gain), [[]])
 
-                    print()
-                    break
+                        for cut in range(act_cut - 1):
+                            names[name][0].append(0)
+                            names[name][1].append(0)
+                            names[name][2].append(0)
+                            names[name][4].append([])
+
+                        
+                        with open(f"{self.path}_names.db", "w") as nm:
+                            json.dump(names, nm)
+
+                        print()
+                        break
                 except:
                     print("Porciento incorrecto -> (0-100)")
 
@@ -386,37 +418,40 @@ class sales:
                 else:
                     print("El articulo no ha sido vendido en este corte. \n")
 
-    def resume(self):
+    def select_cuts(self):
         while(True):
             sel = input("Cortes a resumir: \n1 - Todos\n2 - Ultimo\n3 - Seleccion Manual\n-> ")
 
+            cuts = []
+
             if sel == "":
-                print()
-                return
+                return cuts
+
             elif sel == "1":
                 with open("./users.db") as us:
                     users = json.load(us)
-
                     cuts = [i for i in range(0, users[self.name][self.sale])]
-                    self.__resume__(cuts)
+                    break
 
             elif sel == "2":
                 with open("./users.db") as us:
                     users = json.load(us)
-
                     cuts = [users[self.name][self.sale] - 1]
-                    self.__resume__(cuts)
+                    break
+
 
             elif sel == "3":
                 cut = input("\nCortes: ")
                 try:
-                    cuts = {int(x) - 1 for x in cut.split()}             
-                    self.__resume__(cuts)
+                    cuts = {int(x) - 1 for x in cut.split()} 
+                    break            
                 except:
                     print("Entrada Invalida\n")
                     continue
 
-    def __resume__(self, cuts):
+        return cuts
+
+    def resume_sales(self, cuts):
         with open(f"{self.path}.db") as db:
             with open(f"{self.path}_names.db") as nm:
                 names = json.load(nm)
@@ -510,11 +545,7 @@ class sales:
                 except:
                     pass
 
-            self.info_articles(lost)
-
-            print(f"Total: {len(lost)}")
-
-            print()  
+            return lost
 
     def check_inventory(self, name):
             with open(f"{self.path}.db") as db:
@@ -529,13 +560,9 @@ class sales:
             except:
                 pass
 
-            self.info_articles(inven)
+            return inven
 
-            print(f"Total: {len(inven)}")
-
-            print()  
-
-    def check_sold(self, name, cuts):
+    def check_sold(self, name, cuts, report = False):
         with open(f"{self.path}_names.db") as nm:
             names = json.load(nm)
             
@@ -547,17 +574,24 @@ class sales:
 
             with open(f"{self.path}.db") as db:
                 data = json.load(db)
+                clothes = []
 
                 for cut in cuts:
                     try:       
                         for cl in names[name][4][cut]:
-                            print(f"{cl}: {data[cl][4]} -> {data[cl][1]}")
-                            cant += 1
-                            total += data[cl][1]
+                            if not report:
+                                print(f"{cl}: {data[cl][4]} -> {data[cl][1]}")
+                                cant += 1
+                                total += data[cl][1]
+                            else:
+                                clothes.append(cl)
                     except:
                         break
-
-            print(f"\nTotal: {cant} \nValor: {total} \n")
+            
+            if not report:
+                print(f"\nTotal: {cant} \nValor: {total} \n")
+            else:
+                return clothes
 
     def check_returned_to_owners(self, name):
         with open(f"{self.path}.db") as db:
@@ -572,11 +606,7 @@ class sales:
             except:
                 pass
 
-            self.info_articles(inven)
-
-            print(f"Total: {len(inven)}")
-
-            print() 
+            return inven
 
     def check_cuts(self, cuts):
         with open("./users.db") as us:
@@ -654,11 +684,18 @@ class sales:
             elif opt == "2":        
                 name = input("1 - Todos\n2 - Por Nombre\nEnter - Atras\n->")
                 if name == "1":
-                    self.check_lost("todos")
+                    lost = self.check_lost("todos")
+                    self.info_articles(lost)
+
+                    print(f"Total: {len(lost)}\n")
+
                 
                 elif name == "2":
                     nm = input("\nNombre: ")
-                    self.check_lost(nm)
+                    lost = self.check_lost(nm)
+                    self.info_articles(lost)
+
+                    print(f"Total: {len(lost)}\n")
                
                 else:
                     continue
@@ -731,10 +768,10 @@ class sales:
                 name = data[art][3]
                 price = float(data[art][0])
 
-                if not data[art][5]:
-                    return (False, data[art][:], "Devuelto")
-                elif data[art][2]:
+                if data[art][2]:
                     return (False, data[art][:], "Vendido")
+                elif not data[art][5]:
+                    return (False, data[art][:], "Devuelto")
                 elif data[art][6]:
                     return (True, data[art][:], "En inventario")
                 else:
@@ -778,45 +815,20 @@ class sales:
             if name not in names:
                 print("Ese nombre no existe.\n")
                 return
-                
-            while(True):
-                sel = input("\nCortes a resumir: \n1 - Todos\n2 - Ultimo\n3 - Seleccion Manual\nEnter - Atras\n-> ")
+                   
+            with open("./users.db") as us:
+                users = json.load(us)
+                cuts = [i for i in range(0, users[self.name][self.sale])]
+                clothes = []
 
-                if sel == "":
-                    print()
-                    return
-                elif sel == "1":
-                    with open("./users.db") as us:
-                        users = json.load(us)
-                        cuts = [i for i in range(0, users[self.name][self.sale])]
-                        
-                        print("\nPrendas Vendidas: ")
-                        self.check_sold(name, cuts)        
+                clothes.extend(self.check_sold(name, cuts, True))      
 
-                        print("\nPrendas En Inventario: ")
-                        self.check_inventory(name)
+                clothes.extend(self.check_inventory(name))
 
-                        print("\nPrendas Faltantes: ")
-                        self.check_lost(name)
+                clothes.extend(self.check_lost(name))
 
-                        print("\nPrendas Devueltas:")
-                        self.check_returned_to_owners(name)
+                clothes.extend(self.check_returned_to_owners(name))
 
-                elif sel == "2":
-                    with open("./users.db") as us:
-                        users = json.load(us)
-                        cuts = [users[self.name][self.sale] - 1]
+                self.info_articles(clothes)
 
-                        print("\nPrendas Vendidas: ")
-                        self.check_sold(name, cuts)  
-
-                elif sel == "3":
-                    cut = input("\nCortes: ")
-                    try:
-                        cuts = {int(x) - 1 for x in cut.split()}             
-                        
-                        print("\nPrendas Vendidas: ")
-                        self.check_sold(name, cuts)  
-                    except:
-                        print("Entrada Invalida\n")
-                        continue
+                print(f"Total: {len(clothes)}\n")
