@@ -78,7 +78,7 @@ class sales:
                                     if nm == "":
                                         print("Cancelado.\n")
                                     else:
-                                        self.check_sold(nm, cuts)
+                                        self.info_sold(self.check_sold(nm, cuts))
 
                             continue                          
                     
@@ -347,6 +347,35 @@ class sales:
 
         print()
 
+    def info_sold(self, arts):
+        print("\n%-7s%-45s%-10s%-10s" % ("No", "Informacion", "Costo", "Estado"))
+        print("_"*75)
+
+        inv = []
+        cant = 0
+        money = 0
+
+        for art in arts:
+            cl = self.search_article(art)
+            cant += 1
+            money += cl[1][1]
+
+            if cl[1] is not None:
+                print("%-7s%-45s%-10s%-10s" %
+                    (art, cl[1][4], cl[1][1], cl[2]))
+
+            else:
+                inv.append(cl[2])
+        
+        print("_"*75)
+        print(f"Total: {cant} -> {money}$")
+        print()
+        
+        for i in inv:
+            print(i)
+
+        print()
+
     def return_article(self):
         serial = input("Numero de serie: ")
         print()
@@ -559,7 +588,7 @@ class sales:
 
             return inven
 
-    def check_sold(self, name, cuts, report = False):
+    def check_sold(self, name, cuts):
         with open(f"{self.path}_names.db") as nm:
             names = json.load(nm)
             
@@ -575,20 +604,12 @@ class sales:
 
                 for cut in cuts:
                     try:       
-                        for cl in names[name][4][cut]:
-                            if not report:
-                                print(f"{cl}: {data[cl][4]} -> {data[cl][1]}")
-                                cant += 1
-                                total += data[cl][1]
-                            else:
+                        for cl in names[name][4][cut]:                           
                                 clothes.append(cl)
                     except:
                         break
-            
-            if not report:
-                print(f"\nTotal: {cant} \nValor: {total} \n")
-            else:
-                return clothes
+                
+            return clothes
 
     def check_returned_to_owners(self, name):
         with open(f"{self.path}.db") as db:
@@ -818,7 +839,7 @@ class sales:
                 cuts = [i for i in range(0, users[self.name][self.sale])]
                 clothes = []
 
-                clothes.extend(self.check_sold(name, cuts, True))      
+                clothes.extend(self.check_sold(name, cuts))      
 
                 clothes.extend(self.check_inventory(name))
 
