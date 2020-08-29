@@ -83,7 +83,11 @@ class sales:
                             continue                          
                     
                     elif sel == "2":
-                        select = input("Nombre: ")          
+                        select = input("Nombre: ") 
+                        if select == "":
+                            print()
+                            continue
+
                         self.resume_names(select)
 
                     elif sel == "3":
@@ -95,18 +99,18 @@ class sales:
                                 cuts = [i for i in range(0, users[self.name][self.sale])]
                                 
                                 
-                                        
-                                print("\n%-19s%-8s%-10s%-12s%-10s%10s" % ("Nombres",
+                                print("_"*77)        
+                                print("\n%-20s|%-10s|%-10s|%-12s|%-10s|%10s|" % ("Nombres",
                                                                     "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
-                                print("_"*70)
+                                print("_"*77)
                                 tot_v = tot_i = tot_e = tot_f = tot_t = 0
                                
 
                                 for name in names.items():
-                                    vendido = len(self.check_sold(name[0],cuts, True))
+                                    vendido = len(self.check_sold(name[0],cuts))
                                     tot_v += vendido
                                     inventario = len(self.check_inventory(name[0]))
-                                    tot_t += inventario
+                                    tot_i += inventario
                                     entregado = len(self.check_returned_to_owners(name[0]))
                                     tot_e += entregado
                                     faltante = len(self.check_lost(name[0]))
@@ -114,12 +118,12 @@ class sales:
                                     total = vendido + inventario + entregado + faltante
                                     tot_t += total
 
-                                    print("%-20s%-10s%-10s%-12s%-10s%-10s" %
+                                    print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" %
                                         (name[0], total, vendido, inventario, entregado, faltante))
                                 
 
-                                print("_"*70)
-                                print("%-20s%-10s%-10s%-12s%-10s%-10s" % ("Total",
+                                print("_"*77)
+                                print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" % ("Total",
                                                                     tot_t, tot_v, tot_i, tot_e, tot_f))
                             
                             print()
@@ -177,6 +181,8 @@ class sales:
                             elif len(prices) == 1:
                                 data[curr_art] = (float(prices[0]), float(
                                     prices[0]), False, name, info, True, False)
+                            else:
+                                raise ValueError
 
                             print(f"Articulo Añadido Exitosamente \n")
 
@@ -324,22 +330,23 @@ class sales:
                 print("Cancelado\n")
     
     def info_articles(self, arts):
-        print("\n%-7s%-20s%-45s%-10s%-10s%-10s" % ("No", "Dueño",
+        print("_"*107)
+        print("\n%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" % ("No", "Dueño",
                                                             "Informacion", "Venta", "Costo", "Estado"))
-        print("_"*100)
+        print("_"*107)
 
         inv = []
         for art in arts:
             cl = self.search_article(art)
 
             if cl[1] is not None:
-                print("%-7s%-20s%-45s%-10s%-10s%-10s" %
+                print("%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" %
                     (art, cl[1][3], cl[1][4], cl[1][0], cl[1][1], cl[2]))
 
             else:
                 inv.append(cl[2])
         
-        print("_"*100)
+        print("_"*107)
         print()
         
         for i in inv:
@@ -348,7 +355,8 @@ class sales:
         print()
 
     def info_sold(self, arts):
-        print("\n%-7s%-45s%-10s%-10s" % ("No", "Informacion", "Costo", "Estado"))
+        print("_"*75)
+        print("\n%-7s|%-45s|%-10s|%-10s|" % ("No", "Informacion", "Costo", "Estado"))
         print("_"*75)
 
         inv = []
@@ -361,14 +369,14 @@ class sales:
             money += cl[1][1]
 
             if cl[1] is not None:
-                print("%-7s%-45s%-10s%-10s" %
+                print("%-7s|%-45s|%-10s|%-10s|" %
                     (art, cl[1][4], cl[1][1], cl[2]))
 
             else:
                 inv.append(cl[2])
         
         print("_"*75)
-        print(f"Total: {cant} -> {money}$")
+        print(f"\nTotal: {cant} -> {money}$")
         print()
         
         for i in inv:
@@ -492,9 +500,10 @@ class sales:
                 total_dar = 0
                 sold_out = []
 
-                print("\n%-17s%-13s%-10s%-10s%-10s%-10s" % ("Nombres", "Cantidad",
-                                                            "Total", "Entregar", "Ganancia", "Prendas Vendidas"))
-                print("_"*80)
+                print("_"*64) 
+                print("\n%-20s|%-10s|%-10s|%-10s|%-10s|" % ("Nombres", "Cantidad",
+                                                            "Total", "Entregar", "Ganancia"))
+                print("_"*64)
 
                 for name in names.items():
                     total_name = [0,0,0,0,[]]
@@ -511,12 +520,13 @@ class sales:
                         total_name[2] += name[1][2][cut]
                         total_name[4].extend(name[1][4][cut])
 
-                    print("%-20s%-10s%-10s%-10s%-10s" %
-                        (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]), *total_name[4])
+                    print("%-20s|%-10s|%-10.1f|%-10.1f|%-10.1f|" %
+                        (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]))
 
-                print("_"*80)
-                print("%-20s%-10s%-10s%-10s%-10s" %
-                    ("General", cant, total, total_dar, total_gan), *sold_out)
+                print("_"*64)
+                print("%-20s|%-10.1f|%-10.1f|%-10.1f|%-10.1f|" %
+                    ("General", cant, total, total_dar, total_gan))
+                    
                 print()
 
     def add_to_inventory(self):
@@ -533,10 +543,14 @@ class sales:
 
                 for art in list_art:
                     search = self.search_article(art)
-                    if search[0]:
+                    if search[0] and not search[1][6] and search[1][5]:
                         ad_art.append(art)
+                    else:
+                        print(f"{art}: Error al añadir\n")
                
-                
+                if not len(ad_art):
+                    continue
+
                 sure = input("Seguro: ")
                 if sure == "":
                     with open(f"{self.path}.db") as db:
