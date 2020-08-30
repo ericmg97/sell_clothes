@@ -520,11 +520,11 @@ class sales:
                         total_name[2] += name[1][2][cut]
                         total_name[4].extend(name[1][4][cut])
 
-                    print("%-20s|%-10s|%-10.1f|%-10.1f|%-10.1f|" %
+                    print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
                         (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]))
 
                 print("_"*64)
-                print("%-20s|%-10.1f|%-10.1f|%-10.1f|%-10.1f|" %
+                print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
                     ("General", cant, total, total_dar, total_gan))
                     
                 print()
