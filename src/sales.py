@@ -903,23 +903,56 @@ class sales:
 
     def history(self, cuts):
         hist = self.read_log()
+        while True:
+            selc = input("\n1 - General\n2 - Personales\n-> ")
+            if selc == "1":
+                with open(f"{self.path}_names.db") as nm:
+                    names = json.load(nm)
+                    clothes = {}
+                    for name in names.items():
+                        for cut in cuts:
+                            for cl in name[1][4][cut]:
+                                datetime = hist[cl].split()
+                                date = [*datetime[0:3],datetime[4]]
 
-        with open(f"{self.path}_names.db") as nm:
-            names = json.load(nm)
-            clothes = {}
-            for name in names.items():
-                for cut in cuts:
-                    for cl in name[1][4][cut]:
-                        datetime = hist[cl].split()
-                        date = [datetime[0:2],datetime[4]]
-                        string_date = " "
+                                string_date = " ".join(date)
 
-                        string_date.join(date)
-                        if string_date in clothes:
-                            clothes[string_date].append((datetime[3], cl))
-            
-            self.info_history(clothes) 
+                                if string_date in clothes:
+                                    clothes[string_date].append((datetime[3], cl))
+                                else:
+                                    clothes[string_date] = [(datetime[3], cl)]
+                    
+                    self.info_history(clothes) 
+            elif selc == "2":
+                name = input("\nNombre: ")
+
+                with open(f"{self.path}_names.db") as nm:
+                    names = json.load(nm)
+                        
+                    if name not in names:
+                        print("Ese nombre no existe.\n")
+                        continue
+
+                    clothes = {}
                 
+                    for cut in cuts:
+                        for cl in names[name][4][cut]:
+                            datetime = hist[cl].split()
+                            date = [*datetime[0:3],datetime[4]]
+
+                            string_date = " ".join(date)
+
+                            if string_date in clothes:
+                                clothes[string_date].append((datetime[3], cl))
+                            else:
+                                clothes[string_date] = [(datetime[3], cl)]
+                
+                    self.info_history(clothes) 
+
+            else:
+                print()
+                break
+
     def read_log(self):
         with open(f"{self.path}.log") as logfile:
             lines = logfile.readlines()
@@ -936,28 +969,20 @@ class sales:
 
     def info_history(self, hist):
         for date in hist.items():
-            print(f"{date[0]}:")
-            print("_"*107)
-            print("\n%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" % ("Hora", "No", "Dueño",
+            
+            print(f"\n{date[0]}:")
+            
+            print("_"*124)
+            print("\n|%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" % ("Hora", "No", "Dueño",
                                                                 "Informacion", "Venta", "Costo", "Estado"))
-            print("_"*107)
-
-            inv = []
+            print("_"*124)
       
             for art in date[1]:
-                cl = self.search_article(art)
+                cl = self.search_article(art[1])
 
                 if cl[1] is not None:
-                    print("%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" %
+                    print("|%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" %
                         (art[0], art[1], cl[1][3], cl[1][4], cl[1][0], cl[1][1], cl[2]))
-
-                else:
-                    inv.append(cl[2])
             
-            print("_"*107)
-            print()
-            
-            for i in inv:
-                print(i)
-
+            print("_"*124)
             print()
