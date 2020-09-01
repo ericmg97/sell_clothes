@@ -91,42 +91,7 @@ class sales:
                         self.resume_names(select)
 
                     elif sel == "3":
-                        with open(f"{self.path}_names.db") as nm:
-                            names = json.load(nm)
-
-                            with open("./users.db") as us:
-                                users = json.load(us)
-                                cuts = [i for i in range(0, users[self.name][self.sale])]
-                                
-                                
-                                print("_"*77)        
-                                print("\n%-20s|%-10s|%-10s|%-12s|%-10s|%10s|" % ("Nombres",
-                                                                    "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
-                                print("_"*77)
-                                tot_v = tot_i = tot_e = tot_f = tot_t = 0
-                               
-
-                                for name in names.items():
-                                    vendido = len(self.check_sold(name[0],cuts))
-                                    tot_v += vendido
-                                    inventario = len(self.check_inventory(name[0]))
-                                    tot_i += inventario
-                                    entregado = len(self.check_returned_to_owners(name[0]))
-                                    tot_e += entregado
-                                    faltante = len(self.check_lost(name[0]))
-                                    tot_f += faltante
-                                    total = vendido + inventario + entregado + faltante
-                                    tot_t += total
-
-                                    print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" %
-                                        (name[0], total, vendido, inventario, entregado, faltante))
-                                
-
-                                print("_"*77)
-                                print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" % ("Total",
-                                                                    tot_t, tot_v, tot_i, tot_e, tot_f))
-                            
-                            print()
+                        self.status()
 
             else:
                 break
@@ -519,9 +484,10 @@ class sales:
                         total_name[1] += name[1][1][cut]
                         total_name[2] += name[1][2][cut]
                         total_name[4].extend(name[1][4][cut])
-
-                    print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
-                        (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]))
+                    
+                    if total_name[0]:
+                        print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
+                            (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]))
 
                 print("_"*64)
                 print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
@@ -864,3 +830,46 @@ class sales:
                 self.info_articles(clothes)
 
                 print(f"Total: {len(clothes)}\n")
+
+    def status(self):
+        with open(f"{self.path}_names.db") as nm:
+            names = json.load(nm)
+
+            with open("./users.db") as us:
+                users = json.load(us)
+                cuts = [i for i in range(0, users[self.name][self.sale])]
+                
+                
+                print("_"*77)        
+                print("\n%-20s|%-10s|%-10s|%-12s|%-10s|%10s|" % ("Nombres",
+                                                    "Total", "Vendido", "Inventario", "Entregado", "Faltantes"))
+                print("_"*77)
+                tot_v = tot_i = tot_e = tot_f = tot_t = 0
+                
+                inactive = []
+
+                for name in names.items():
+                    vendido = len(self.check_sold(name[0],cuts))
+                    tot_v += vendido
+                    inventario = len(self.check_inventory(name[0]))
+                    tot_i += inventario
+                    entregado = len(self.check_returned_to_owners(name[0]))
+                    tot_e += entregado
+                    faltante = len(self.check_lost(name[0]))
+                    tot_f += faltante
+                    total = vendido + inventario + entregado + faltante
+                    tot_t += total
+
+                    if vendido + entregado != total:
+                        print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" %
+                            (name[0], total, vendido, inventario, entregado, faltante))
+                    else:
+                        tot_v -= vendido
+                        tot_e -= entregado
+                        tot_t -= total
+
+                print("_"*77)
+                print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" % ("Total",
+                                                    tot_t, tot_v, tot_i, tot_e, tot_f))
+            
+            print()
