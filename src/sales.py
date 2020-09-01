@@ -512,12 +512,12 @@ class sales:
                     if search[0] and not search[1][6] and search[1][5]:
                         ad_art.append(art)
                     else:
-                        print(f"{art}: Error al añadir\n")
+                        print(f"{art}: Error al añadir")
                
                 if not len(ad_art):
                     continue
 
-                sure = input("Seguro: ")
+                sure = input("\nSeguro: ")
                 if sure == "":
                     with open(f"{self.path}.db") as db:
                         data = json.load(db)
@@ -622,36 +622,57 @@ class sales:
             return True
 
     def return_clothe_to_owner(self):
-        owner = input("Nombre: ")
-        
-        if owner == "":
-            print()
-            return
-
-        with open(f"{self.path}.db") as db:
-            data = json.load(db)
-            own = False
+        while True:
+            owner = input("Nombre: ")
             
-            print("\nPrendas Entregadas: \n")
-            info = []
-            for cl in data:            
-                if data[cl][3] == owner:
-                    own = True
+            if owner == "":
+                print()
+                return
+
+            with open(f"{self.path}_names.db") as nm:
+                names = json.load(nm)
                     
-                    if data[cl][6] and not data[cl][2] and data[cl][5]:
-                        info.append(cl)               
-                        data[cl][5] = False
-            
-            if len(info):
-                self.info_articles(info)
+                if owner not in names:
+                    print("Ese nombre no existe.\n")
+                    continue
 
-            with open(f"{self.path}.db", "w") as d:
-                json.dump(data, d)
-        
-        if not own: 
-            print("\nDueño no encontrado. ")
-        
-        print()
+            opt = input("\n1 - Todas \n2 - Seleccion \nEnter - Atras \n-> ") 
+            clothes = []
+    
+            if opt == "1":
+                clothes = self.check_inventory(owner)
+
+            elif opt == "2":
+                cloth = input("\nPrendas: ")
+                cloth = cloth.split()
+
+                for cl in cloth:
+                    if self.search_article(cl)[0]:
+                        clothes.append(cl)
+            
+            else:
+                print()
+                continue
+
+            with open(f"{self.path}.db") as db:
+                data = json.load(db)
+                
+                info = []
+                for cl in clothes:            
+                    if data[cl][3] == owner:
+                        if data[cl][6] and not data[cl][2] and data[cl][5]:
+                            info.append(cl)               
+                            data[cl][5] = False
+                
+                print("\nPrendas Entregadas: \n")         
+                
+                if len(info):
+                    self.info_articles(info)
+
+                with open(f"{self.path}.db", "w") as d:
+                    json.dump(data, d)
+
+            print()
 
     def delete_inventory(self):
         sure = input("Estas serguro: ")
