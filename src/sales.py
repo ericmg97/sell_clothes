@@ -18,7 +18,7 @@ class sales:
                 print()
 
 
-            selected = input("\n1 - Articulos\n2 - Inventario \n3 - Resumen\nEnter - Salir\n-> ")
+            selected = input("\n1 - Articulos\n2 - Inventario \n3 - Resumen\n4 - Historial\nEnter - Salir\n-> ")
             print()
             
 
@@ -92,6 +92,12 @@ class sales:
 
                     elif sel == "3":
                         self.status()
+
+            elif selected == "4":
+                cuts = self.select_cuts()
+                print()
+                
+                self.history(cuts)
 
             else:
                 break
@@ -893,4 +899,65 @@ class sales:
                 print("%-20s|%-10s|%-10s|%-12s|%-10s|%-10s|" % ("Total",
                                                     tot_t, tot_v, tot_i, tot_e, tot_f))
             
+            print()
+
+    def history(self, cuts):
+        hist = self.read_log()
+
+        with open(f"{self.path}_names.db") as nm:
+            names = json.load(nm)
+            clothes = {}
+            for name in names.items():
+                for cut in cuts:
+                    for cl in name[1][4][cut]:
+                        datetime = hist[cl].split()
+                        date = [datetime[0:2],datetime[4]]
+                        string_date = " "
+
+                        string_date.join(date)
+                        if string_date in clothes:
+                            clothes[string_date].append((datetime[3], cl))
+            
+            self.info_history(clothes) 
+                
+    def read_log(self):
+        with open(f"{self.path}.log") as logfile:
+            lines = logfile.readlines()
+            history = {}
+
+            for line in lines:
+                split = line.split(" -> Prendas vendidas: ")
+                clothes = split[1].split()
+
+                for cl in clothes:
+                    history[cl] = split[0]
+        
+        return history              
+
+    def info_history(self, hist):
+        for date in hist.items():
+            print(f"{date[0]}:")
+            print("_"*107)
+            print("\n%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" % ("Hora", "No", "Dueño",
+                                                                "Informacion", "Venta", "Costo", "Estado"))
+            print("_"*107)
+
+            inv = []
+      
+            for art in date[1]:
+                cl = self.search_article(art)
+
+                if cl[1] is not None:
+                    print("%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" %
+                        (art[0], art[1], cl[1][3], cl[1][4], cl[1][0], cl[1][1], cl[2]))
+
+                else:
+                    inv.append(cl[2])
+            
+            print("_"*107)
+            print()
+            
+            for i in inv:
+                print(i)
+
             print()
