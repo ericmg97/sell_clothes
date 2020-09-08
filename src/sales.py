@@ -1,5 +1,6 @@
 import json
 from utils import *
+from datetime import datetime
 
 class sales:
     def __init__(self, name, sale):
@@ -63,7 +64,7 @@ class sales:
                     if sel == "1":
                         cuts = self.select_cuts()
                         print()
-
+                    
                         if len(cuts):
                             while True:
                                 inp = input("1 - General\n2 - Personales\nEnter - Atras\n-> ")
@@ -96,6 +97,10 @@ class sales:
             elif selected == "4":
                 cuts = self.select_cuts()
                 print()
+                
+                if not len(cuts):
+                    continue
+                
                 
                 self.history(cuts)
 
@@ -518,12 +523,12 @@ class sales:
                     if search[0] and not search[1][6] and search[1][5]:
                         ad_art.append(art)
                     else:
-                        print(f"{art}: Error al añadir")
+                        print(f"{art}: Error al añadir\n")
                
                 if not len(ad_art):
                     continue
 
-                sure = input("\nSeguro: ")
+                sure = input("Seguro: ")
                 if sure == "":
                     with open(f"{self.path}.db") as db:
                         data = json.load(db)
@@ -968,7 +973,11 @@ class sales:
         return history              
 
     def info_history(self, hist):
-        for date in hist.items():
+
+        dict_item = hist.items()
+        dict_sorted = sorted(dict_item, key = lambda x:datetime.strptime(x[0], "%a %b %d %Y"))
+
+        for date in dict_sorted:
             
             print(f"\n{date[0]}:")
             
@@ -976,13 +985,20 @@ class sales:
             print("\n|%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" % ("Hora", "No", "Dueño",
                                                                 "Informacion", "Venta", "Costo", "Estado"))
             print("_"*124)
-      
-            for art in date[1]:
-                cl = self.search_article(art[1])
+            
+            hour_sorted = sorted(date[1], key = lambda x:datetime.strptime(x[0],"%H:%M:%S"))
+            gain = 0
 
+            for art in hour_sorted:
+                cl = self.search_article(art[1])
+                
                 if cl[1] is not None:
+                    gain += cl[1][0]
+
                     print("|%-15s|%-7s|%-20s|%-45s|%-10s|%-10s|%-10s|" %
                         (art[0], art[1], cl[1][3], cl[1][4], cl[1][0], cl[1][1], cl[2]))
             
             print("_"*124)
             print()
+
+            print(f"Caja: {gain}\n")
