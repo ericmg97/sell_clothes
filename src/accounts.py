@@ -67,9 +67,6 @@ def create_sales(name):
             with open(f"{path}.db", "w") as db:
                 json.dump({}, db)
 
-            with open(f"{path}.log", "w") as log:
-                pass
-
             with open(f"{path}_names.db", "w") as names:
                 json.dump({}, names)
 

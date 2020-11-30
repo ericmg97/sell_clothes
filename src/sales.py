@@ -1,5 +1,5 @@
 import json
-from utils import *
+from utils import log, create_path
 from datetime import datetime
 
 class sales:
@@ -232,7 +232,7 @@ class sales:
 
                         names[name] = ([0], [0], [0], int(gain), [[]])
 
-                        for cut in range(act_cut - 1):
+                        for _ in range(act_cut - 1):
                             names[name][0].append(0)
                             names[name][1].append(0)
                             names[name][2].append(0)
@@ -465,46 +465,44 @@ class sales:
         return cuts
 
     def resume_sales(self, cuts):
-        with open(f"{self.path}.db") as db:
-            with open(f"{self.path}_names.db") as nm:
-                names = json.load(nm)
-                data = json.load(db)
-                    
-                total = 0
-                cant = 0
-                total_gan = 0
-                total_dar = 0
-                sold_out = []
+        with open(f"{self.path}_names.db") as nm:
+            names = json.load(nm)
+                
+            total = 0
+            cant = 0
+            total_gan = 0
+            total_dar = 0
+            sold_out = []
 
-                print("_"*64) 
-                print("\n%-20s|%-10s|%-10s|%-10s|%-10s|" % ("Nombres", "Cantidad",
-                                                            "Total", "Entregar", "Ganancia"))
-                print("_"*64)
+            print("_"*64) 
+            print("\n%-20s|%-10s|%-10s|%-10s|%-10s|" % ("Nombres", "Cantidad",
+                                                        "Total", "Entregar", "Ganancia"))
+            print("_"*64)
 
-                for name in names.items():
-                    total_name = [0,0,0,0,[]]
-                    
-                    for cut in cuts:
-                        cant += name[1][0][cut]
-                        total += name[1][1][cut]
-                        total_gan += name[1][1][cut] - name[1][2][cut]
-                        total_dar += name[1][2][cut]
-                        sold_out.extend(name[1][4][cut])
+            for name in names.items():
+                total_name = [0,0,0,0,[]]
+                
+                for cut in cuts:
+                    cant += name[1][0][cut]
+                    total += name[1][1][cut]
+                    total_gan += name[1][1][cut] - name[1][2][cut]
+                    total_dar += name[1][2][cut]
+                    sold_out.extend(name[1][4][cut])
 
-                        total_name[0] += name[1][0][cut]
-                        total_name[1] += name[1][1][cut]
-                        total_name[2] += name[1][2][cut]
-                        total_name[4].extend(name[1][4][cut])
-                    
-                    if total_name[0]:
-                        print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
-                            (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]))
+                    total_name[0] += name[1][0][cut]
+                    total_name[1] += name[1][1][cut]
+                    total_name[2] += name[1][2][cut]
+                    total_name[4].extend(name[1][4][cut])
+                
+                if total_name[0]:
+                    print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
+                        (name[0], total_name[0], total_name[1], total_name[2], total_name[1] - total_name[2]))
 
-                print("_"*64)
-                print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
-                    ("General", cant, total, total_dar, total_gan))
-                    
-                print()
+            print("_"*64)
+            print("%-20s|%-10s|%-10.2f|%-10.2f|%-10.2f|" %
+                ("General", cant, total, total_dar, total_gan))
+                
+            print()
 
     def add_to_inventory(self):
         while True:
@@ -582,23 +580,18 @@ class sales:
     def check_sold(self, name, cuts):
         with open(f"{self.path}_names.db") as nm:
             names = json.load(nm)
-            
-            total = 0
-            cant = 0
 
             if not self.check_cuts(cuts):
                 return
+       
+            clothes = []
 
-            with open(f"{self.path}.db") as db:
-                data = json.load(db)
-                clothes = []
-
-                for cut in cuts:
-                    try:       
-                        for cl in names[name][4][cut]:                           
-                                clothes.append(cl)
-                    except:
-                        break
+            for cut in cuts:
+                try:       
+                    for cl in names[name][4][cut]:                           
+                            clothes.append(cl)
+                except:
+                    break
                 
             return clothes
 
@@ -762,23 +755,17 @@ class sales:
                 if name == "":
                     continue
 
-                with open(f"{self.path}_names.db") as nm:
-                    names = json.load(nm)
-                
-                    desc = input("Descripcion: ")
-                    print()
-                    
-                    self.search_description(desc,name)   
-
-                    print()
+                desc = input("Descripcion: ")
+                self.search_description(desc,name)   
+                print()
 
             else:
                 return
 
     def search_description(self, desc, name = ""):
         if desc == "":
-            return
             print()
+            return
 
         with open(f"{self.path}.db") as db:
             data = json.load(db)
@@ -794,10 +781,6 @@ class sales:
             data = json.load(db)
 
             try:
-                info = data[art][4]
-                name = data[art][3]
-                price = float(data[art][0])
-
                 if data[art][2]:
                     return (False, data[art][:], "Vendido")
                 elif not data[art][5]:
@@ -878,8 +861,6 @@ class sales:
                 print("_"*77)
                 tot_v = tot_i = tot_e = tot_f = tot_t = 0
                 
-                inactive = []
-
                 for name in names.items():
                     vendido = len(self.check_sold(name[0],cuts))
                     tot_v += vendido
